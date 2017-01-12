@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+        . /etc/bashrc
+fi
+
+#
+alias xv='display -flatten -background white'
+alias gva='gv -antialias'
+alias vi='vim'
+
+export PSRHOME="/usr/local"
+
+if [ -f ${PSRHOME}/etc/dir_colors ]; then
+ eval `dircolors -b ${PSRHOME}/etc/dir_colors`
+fi
+
+if [ -f ${HOME}/.dir_colors ]; then
+ eval `dircolors -b ${HOME}/.dir_colors`
+fi
+
+alias ssh='ssh -XY'
+alias ls='ls -F --color'
+PS1="[\[\033[36m\]\u\[\033[0m\]@\[\033[34m\]\h \[\033[0m\]\w]# "
+
+# pulsar software definitions
+if [ -f ${PSRHOME}/etc/psr.bashrc ]; then
+        source ${PSRHOME}/etc/psr.bashrc
+fi
+
+# pulsar software definitions
+if [ -f ${HOME}/.psr.bashrc ]; then
+        source ${HOME}/.psr.bashrc
+fi
