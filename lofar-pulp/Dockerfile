@@ -72,7 +72,7 @@ RUN sudo apt-get update && sudo apt-get upgrade -y && \
                      wget vim libgtk2.0-dev aptitude tcsh apt-utils locate doxygen \
                      libx11-dev libxt-dev libxmu-dev dh-autoreconf python-mpltoolkits.basemap \
 		     imagemagick python-pip dos2unix texlive-font-utils cvs mpich libmpich-dev libmpich12 \
-                     python-ephem python3-ephem python-h5py python3-h5py libaio-dev latex2html
+                     python-ephem python3-ephem python-h5py python3-h5py libaio-dev latex2html gv
 
 # also try python-seaborn for later ubuntu
 
