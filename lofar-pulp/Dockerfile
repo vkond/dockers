@@ -379,7 +379,7 @@ RUN cd ${INSTALLDIR}/src && sudo wget http://www.astro-wise.org/losoft/lofar_lta
     sudo python setup.py install --prefix=${INSTALLDIR}
 
 # dummy variable to indicate from which line to rebuild the image
-ENV START_REBUILD_FROM_HERE="19072017"
+ENV START_REBUILD_FROM_HERE="20072017"
     
 #
 # *******************
@@ -409,8 +409,9 @@ ENV PULP="${INSTALLDIR}/src/pulp"
 #
 # I need this repository to copy some necessary scripts, Pulp, 2bf2fits, etc
 #
-RUN cd ${INSTALLDIR}/src && sudo svn co http://usg.lofar.org/svn/code/trunk lofarsoft
-ARG LOFARSOFT="${INSTALLDIR}/src/lofarsoft"
+#ARG LOFARSOFT="${INSTALLDIR}/src/lofarsoft"
+ENV LOFARSOFT="/opt/lofarsoft"
+RUN sudo mkdir -p ${LOFARSOFT} && cd ${LOFARSOFT} && sudo svn co http://usg.lofar.org/svn/code/trunk .
 # installing 2bf2fits & bf2puma2 (just in case)
 RUN cd ${LOFARSOFT}/src/Pulsar/apps && sudo rsync -avxP bf2format ${INSTALLDIR}/src/ && \
     cd ${INSTALLDIR}/src/bf2format && \
