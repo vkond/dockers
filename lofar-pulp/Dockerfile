@@ -379,7 +379,7 @@ RUN cd ${INSTALLDIR}/src && sudo wget http://www.astro-wise.org/losoft/lofar_lta
     sudo python setup.py install --prefix=${INSTALLDIR}
 
 # dummy variable to indicate from which line to rebuild the image
-ENV START_REBUILD_FROM_HERE="20072017"
+ENV START_REBUILD_FROM_HERE="31072017"
     
 #
 # *******************
