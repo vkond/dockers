@@ -9,15 +9,18 @@ FROM ubuntu:16.04
 # common-environment
 #
 #ENV USER=lofar
-ENV USER=kondratiev
+#ENV USER=kondratiev
+ENV USER=lofarsys
 ENV HOME="/home/${USER}"
 ENV INSTALLDIR=/usr/local
 #
 # set-uid
 #
 #ENV UID=1000
-ENV UID=7406
+#ENV UID=7406
+ENV UID=7149
 
+#
 #
 # environment
 #
