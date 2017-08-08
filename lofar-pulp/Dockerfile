@@ -219,7 +219,7 @@ ENV TEMPO="${INSTALLDIR}/src/tempo"
 RUN cd ${INSTALLDIR}/src && sudo git clone https://bitbucket.org/psrsoft/tempo2.git && cd tempo2 && sudo ./bootstrap && \
     sudo cp -r T2runtime ${INSTALLDIR}/share/tempo2/
 ENV TEMPO2="${INSTALLDIR}/share/tempo2/"
-RUN cd ${INSTALLDIR}/src/tempo2 && sudo ./configure --prefix=/usr/local && sudo make && sudo make install && \
+RUN cd ${INSTALLDIR}/src/tempo2 && sudo TEMPO2=${TEMPO2} ./configure --prefix=/usr/local && sudo make && sudo make install && \
     sudo make plugins && sudo make plugins-install
     
 #
