@@ -31,9 +31,10 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # versions
 #
 ENV CASACORE_VERSION=latest \
-    CASAREST_VERSION=latest \
-    PYTHON_CASACORE_VERSION=2.1.2 \
-    BOOST_VERSION=1.58
+    CASAREST_VERSION=latest
+
+#    PYTHON_CASACORE_VERSION=2.1.2 \
+#    BOOST_VERSION=1.58
 
 #
 # set-build-options
@@ -106,8 +107,10 @@ RUN sudo apt-get update && sudo apt-get install -y libblas-dev liblapack-dev lib
 #   python-casacore (pyrap)
 # *******************
 #
-RUN sudo apt-get install -y software-properties-common && sudo add-apt-repository ppa:radio-astro/main && sudo apt-get update && \
-    sudo apt-get install -y libcasacore21-dev python-setuptools && \
+# sudo add-apt-repository ppa:radio-astro/main
+# sudo apt-get install -y libcasacore21-dev
+RUN sudo apt-get install -y software-properties-common && sudo add-apt-repository -s ppa:kernsuite/kern-2 && sudo apt-add-repository multiverse && \
+    sudo apt-get update && sudo apt-get install -y python-setuptools && \
     cd ${INSTALLDIR}/src && sudo git clone https://github.com/casacore/python-casacore && \
     cd python-casacore && sudo python ./setup.py install
 
@@ -116,7 +119,7 @@ RUN sudo apt-get install -y software-properties-common && sudo add-apt-repositor
 #   FFTW
 # *******************
 #
-ARG FFTW_VERSION="3.3.5"
+ARG FFTW_VERSION="3.3.6-pl2"
 
 RUN cd ${INSTALLDIR}/src && sudo wget --retry-connrefused http://www.fftw.org/fftw-${FFTW_VERSION}.tar.gz && \
     sudo tar xvfz fftw-${FFTW_VERSION}.tar.gz && cd fftw-${FFTW_VERSION} && \
@@ -139,7 +142,7 @@ ENV PATH="${QTDIR}/bin:${PATH}"
 ENV MANPATH="${QTDIR}/doc/man:${MANPATH}"
 ENV LD_LIBRARY_PATH="${QTDIR}/lib"
 
-RUN cd ${INSTALLDIR}/src && sudo mkdir -m 755 -p qt3 && cd qt3 && sudo wget --retry-connrefused http://download.qt.io/archive/qt/3/qt-x11-free-3.3.8b.tar.gz && \
+RUN cd ${INSTALLDIR}/src && sudo mkdir -m 755 -p qt3 && cd qt3 && sudo wget --retry-connrefused -t 0 http://download.qt.io/archive/qt/3/qt-x11-free-3.3.8b.tar.gz && \
     sudo tar xvfz qt-x11-free-3.3.8b.tar.gz && sudo mv qt-x11-free-3.3.8b qt && cd qt && \
     sudo sed -i '2i/usr/local/src/qt3/qt/lib' /etc/ld.so.conf && sudo /sbin/ldconfig && \
     sudo sed -i '2358i\ \ \ \ \ \ \ \ break' configure && \
