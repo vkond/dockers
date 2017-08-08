@@ -430,6 +430,7 @@ RUN cd ${LOFARSOFT}/src/Pulsar/apps && sudo rsync -avxP bf2format ${INSTALLDIR}/
 # making the link to StaticMetaData in USG trunck in our /usr/local/etc
 RUN cd ${INSTALLDIR}/etc && sudo mkdir xml-templates && sudo ln -sf ${LOFARSOFT}/data/lofar/StaticMetaData StaticMetaData && \
     sudo cp ${LOFARSOFT}/src/Pulsar/scripts/psrchive.cfg . && \
+    sudo sed -i 's/^Predictor::default = polyco/Predictor::default = tempo2/' psrchive.cfg && \
     cd xml-templates && sudo rsync -avxP ${LOFARSOFT}/src/Pulsar/scripts/XML-MOM/ .
 # installing modified version of Sigproc's splice (to be called sigproc_splice)
 RUN cd ${INSTALLDIR}/src && sudo mkdir sigproc_splice && cd sigproc_splice && sudo cp ${LOFARSOFT}/src/Pulsar/apps/sigproc-4.3/splice.c . && \
