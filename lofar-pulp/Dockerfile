@@ -286,6 +286,9 @@ RUN cd ${INSTALLDIR}/src && sudo cvs -z3 -d:pserver:anonymous@psrdada.cvs.source
     cd psrdada && sudo sed -i 's/mopsr\ //' Makefile.am && sudo ./bootstrap && \
     sudo ./configure --prefix=${INSTALLDIR} --enable-shared --with-x && sudo make && sudo make install
 
+# dummy variable to indicate from which line to rebuild the image
+ENV START_REBUILD_FROM_HERE="17082017"
+
 #
 # *******************
 #   PSRCHIVE
@@ -384,9 +387,6 @@ RUN cd ${INSTALLDIR}/src && sudo wget http://www.astro-wise.org/losoft/lofar_lta
     sudo python setup.py install_oracle --prefix=${INSTALLDIR} && \
     sudo python setup.py install --prefix=${INSTALLDIR}
 
-# dummy variable to indicate from which line to rebuild the image
-ENV START_REBUILD_FROM_HERE="31072017"
-    
 #
 # *******************
 #   LOFAR-BF-pulsar-scripts
