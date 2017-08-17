@@ -300,7 +300,7 @@ RUN cd ${INSTALLDIR}/src && sudo git clone git://git.code.sf.net/p/psrchive/code
     sudo ./configure --prefix=/usr/local --enable-shared --with-x --with-psrcat=psrcat --with-Qt-include-dir=/usr/local/qt3/include \
        --with-Qt-bin-dir=/usr/local/qt3/bin --with-Qt-lib-dir=/usr/local/qt3/lib --with-Qt-lib=qt-mt && \
     sudo make && sudo make install
-ENV PSRCHIVE="${INSTALLDIR}/src/psrchive"
+ENV PSRCHIVE="${INSTALLDIR}"
 ENV PSRCHIVE_CONFIG="${INSTALLDIR}/etc/psrchive.cfg"
 
 #
@@ -448,8 +448,8 @@ RUN cd ${INSTALLDIR}/bin && sudo cp ${LOFARSOFT}/src/Pulsar/scripts/digitize.py 
     sudo rm -rf ${LOFARSOFT}/src/Pulsar/apps && sudo rm -rf ${LOFARSOFT}/src/Pulsar/external
 
 ENV PYTHONPATH="./:${PRESTO}/lib/python:${PRESTO}/python:${INSTALLDIR}/bin:${INSTALLDIR}/src:${INSTALLDIR}/lib/python2.7/site-packages/:${INSTALLDIR}/lib/python2.7/dist-packages/:${INSTALLDIR}/src/coast_guard:${INSTALLDIR}/bin/lofar_antenna_state:${INSTALLDIR}/src/LOFAR-BF-pulsar-scripts/fluxcal:${MSCORPOL}/mscorpol:${PULP}"
-ENV LD_LIBRARY_PATH="${PGPLOT_DIR}:${PSRCHIVE}/lib:${PRESTO}/lib:${PRESTO}/lib/python:${INSTALLDIR}/lib:/usr/lib:${SIGPROC}:${TEMPO2}/lib:${INSTALLDIR}/lib64:${INSTALLDIR}/lib/instantclient_11_2:${INSTALLDIR}/src/dedisp-multi/lib:${INSTALLDIR}/src/dedisp/lib"
-ENV PATH=".:${HOME}:${HOME}/bin:${INSTALLDIR}/bin:/opt/bin:${PRESTO}/bin:${SIGPROC}:${TEMPO}/src:${PGPLOT_DIR}:${TEMPO2}/bin:${PSRCHIVE}/bin:${SIGPROC}:${INSTALLDIR}/src/coast_guard:${INSTALLDIR}/bin/lofar_antenna_state:${INSTALLDIR}/src/LOFAR-BF-pulsar-scripts:${INSTALLDIR}/src/LOFAR-BF-pulsar-scripts/simple-sh-scripts:${INSTALLDIR}/src/LOFAR-BF-pulsar-scripts/scheduling:${INSTALLDIR}/src/LOFAR-BF-pulsar-scripts/fluxcal:${INSTALLDIR}/src/LOFAR-BF-pulsar-scripts/LTA:${INSTALLDIR}/src/LOFAR-BF-pulsar-scripts/FE-map:${MSCORPOL}/mscorpol:${MSCORPOL}/lofar_element_response:${PULP}:${PATH}"
+ENV LD_LIBRARY_PATH="${PGPLOT_DIR}:${PRESTO}/lib:${PRESTO}/lib/python:${INSTALLDIR}/lib:/usr/lib:${SIGPROC}:${TEMPO2}/lib:${INSTALLDIR}/lib64:${INSTALLDIR}/lib/instantclient_11_2:${INSTALLDIR}/src/dedisp-multi/lib:${INSTALLDIR}/src/dedisp/lib"
+ENV PATH=".:${HOME}:${HOME}/bin:${INSTALLDIR}/bin:/opt/bin:${PRESTO}/bin:${SIGPROC}:${TEMPO}/src:${PGPLOT_DIR}:${TEMPO2}/bin:${SIGPROC}:${INSTALLDIR}/src/coast_guard:${INSTALLDIR}/bin/lofar_antenna_state:${INSTALLDIR}/src/LOFAR-BF-pulsar-scripts:${INSTALLDIR}/src/LOFAR-BF-pulsar-scripts/simple-sh-scripts:${INSTALLDIR}/src/LOFAR-BF-pulsar-scripts/scheduling:${INSTALLDIR}/src/LOFAR-BF-pulsar-scripts/fluxcal:${INSTALLDIR}/src/LOFAR-BF-pulsar-scripts/LTA:${INSTALLDIR}/src/LOFAR-BF-pulsar-scripts/FE-map:${MSCORPOL}/mscorpol:${MSCORPOL}/lofar_element_response:${PULP}:${PATH}"
 
 RUN sudo updatedb
 
