@@ -286,9 +286,6 @@ RUN cd ${INSTALLDIR}/src && sudo cvs -z3 -d:pserver:anonymous@psrdada.cvs.source
     cd psrdada && sudo sed -i 's/mopsr\ //' Makefile.am && sudo ./bootstrap && \
     sudo ./configure --prefix=${INSTALLDIR} --enable-shared --with-x && sudo make && sudo make install
 
-# dummy variable to indicate from which line to rebuild the image
-ENV START_REBUILD_FROM_HERE="17082017"
-
 #
 # *******************
 #   PSRCHIVE
@@ -387,13 +384,18 @@ RUN cd ${INSTALLDIR}/src && sudo wget http://www.astro-wise.org/losoft/lofar_lta
     sudo python setup.py install_oracle --prefix=${INSTALLDIR} && \
     sudo python setup.py install --prefix=${INSTALLDIR}
 
+# dummy variable to indicate from which line to rebuild the image
+ENV START_REBUILD_FROM_HERE="30082017"
+
 #
 # *******************
 #   LOFAR-BF-pulsar-scripts
 # *******************
 #
 RUN cd ${INSTALLDIR}/src && sudo git clone https://github.com/vkond/LOFAR-BF-pulsar-scripts && \
-    cd LOFAR-BF-pulsar-scripts/FE-map && \
+    cd LOFAR-BF-pulsar-scripts && \
+    sudo cp subdyn.py ${INSTALLDIR}/bin && \
+    cd FE-map && \
     sudo sed -i '27s/stations_file/#stations_file/' lofar_status_map.py && \
     statdir=`pwd` && sudo sed -i "28istations_file=\"$statdir/stations.txt\"" lofar_status_map.py && \
     cd ../fluxcal && flaggeddir=`pwd` && sudo sed -i "s|\/home\/astron\/kondratiev\/pulsar\/etc\/flagged-antennas-tom-hassall|$flaggeddir|g" lofar_fluxcal.py && \
