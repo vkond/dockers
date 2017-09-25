@@ -374,9 +374,6 @@ RUN cd ${INSTALLDIR}/src && sudo git clone https://github.com/2baOrNot2ba/mscorp
     sudo sed -i "2iAntennaFieldDirectory=\"$antenna_field_dir\"" parseAntennaField.py
 ENV MSCORPOL="${INSTALLDIR}/src/mscorpol"
 
-# dummy variable to indicate from which line to rebuild the image
-ENV START_REBUILD_FROM_HERE="19092017"
-
 #
 # *******************
 #   lofar_lta
@@ -386,6 +383,9 @@ RUN cd ${INSTALLDIR}/src && sudo wget http://www.astro-wise.org/losoft/lofar_lta
     sudo tar xvfz lofar_lta-2.6.0.tar.gz && cd lofar_lta-2.6.0 && \
     sudo python setup.py install_oracle --prefix=${INSTALLDIR} && \
     sudo python setup.py install --prefix=${INSTALLDIR}
+
+# dummy variable to indicate from which line to rebuild the image
+ENV START_REBUILD_FROM_HERE="25092017"
 
 #
 # *******************
