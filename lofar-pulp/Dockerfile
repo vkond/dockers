@@ -385,7 +385,7 @@ RUN cd ${INSTALLDIR}/src && sudo wget http://www.astro-wise.org/losoft/lofar_lta
     sudo python setup.py install --prefix=${INSTALLDIR}
 
 # dummy variable to indicate from which line to rebuild the image
-ENV START_REBUILD_FROM_HERE="25092017"
+ENV START_REBUILD_FROM_HERE="18102017"
 
 #
 # *******************
@@ -396,8 +396,8 @@ RUN cd ${INSTALLDIR}/src && sudo git clone https://github.com/vkond/LOFAR-BF-pul
     cd LOFAR-BF-pulsar-scripts && \
     sudo cp subdyn.py ${INSTALLDIR}/bin && \
     cd FE-map && \
-    sudo sed -i '27s/stations_file/#stations_file/' lofar_status_map.py && \
-    statdir=`pwd` && sudo sed -i "28istations_file=\"$statdir/stations.txt\"" lofar_status_map.py && \
+    sudo sed -i '28s/stations_file/#stations_file/' lofar_status_map.py && \
+    statdir=`pwd` && sudo sed -i "29istations_file=\"$statdir/stations.txt\"" lofar_status_map.py && \
     cd ../fluxcal && flaggeddir=`pwd` && sudo sed -i "s|\/home\/astron\/kondratiev\/pulsar\/etc\/flagged-antennas-tom-hassall|$flaggeddir|g" lofar_fluxcal.py && \
     sudo sed -i "s|\/home\/astron\/kondratiev\/pulsar\/etc\/flagged-antennas-tom-hassall|$flaggeddir|g" lofar_psrflux.py && \
     sudo sed -i "s|\/home\/astron\/kondratiev\/pulsar\/etc\/flagged-antennas-tom-hassall|$flaggeddir|g" lofar_fluxcal.py.orig && \
