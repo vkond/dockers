@@ -286,6 +286,9 @@ RUN cd ${INSTALLDIR}/src && sudo cvs -z3 -d:pserver:anonymous@psrdada.cvs.source
     cd psrdada && sudo sed -i 's/mopsr\ //' Makefile.am && sudo ./bootstrap && \
     sudo ./configure --prefix=${INSTALLDIR} --enable-shared --with-x && sudo make && sudo make install
 
+# dummy variable to indicate from which line to rebuild the image
+ENV START_REBUILD_FROM_HERE="13122017"
+
 #
 # *******************
 #   PSRCHIVE
@@ -300,6 +303,18 @@ RUN cd ${INSTALLDIR}/src && sudo git clone git://git.code.sf.net/p/psrchive/code
     sudo ./configure --prefix=/usr/local --enable-shared --with-x --with-psrcat=psrcat --with-Qt-include-dir=/usr/local/qt3/include \
        --with-Qt-bin-dir=/usr/local/qt3/bin --with-Qt-lib-dir=/usr/local/qt3/lib --with-Qt-lib=qt-mt && \
     sudo make && sudo make install
+# running psrchive_config and put the config file to /usr/local/etc/psrchive.cfg
+# and making necessary changes, such as
+# FrequencyAppend::weight change from 'radiometer' to 'none'
+# FrequencyAppend::force_new_predictor from 0 to 1
+# Other necessary parameters seem now to have good values by default, i.e.
+# Dispersion::barycentric_correction = 1
+# WeightedFrequency::round_to_kHz = 0
+# Predictor::default = tempo2
+# Predictor::policy = default
+RUN cd ${INSTALLDIR}/etc && sudo ${INSTALLDIR}/bin/psrchive_config > psrchive.cfg && \
+    sudo sed -i 's/#\ FrequencyAppend::force_new_predictor\ =\ 0/FrequencyAppend::force_new_predictor\ =\ 1/' psrchive.cfg && \
+    sudo sed -i 's/FrequencyAppend::weight\ =\ radiometer/FrequencyAppend::weight\ =\ none/' psrchive.cfg
 ENV PSRCHIVE="${INSTALLDIR}"
 ENV PSRCHIVE_CONFIG="${INSTALLDIR}/etc/psrchive.cfg"
 
@@ -384,9 +399,6 @@ RUN cd ${INSTALLDIR}/src && sudo wget http://www.astro-wise.org/losoft/lofar_lta
     sudo python setup.py install_oracle --prefix=${INSTALLDIR} && \
     sudo python setup.py install --prefix=${INSTALLDIR}
 
-# dummy variable to indicate from which line to rebuild the image
-ENV START_REBUILD_FROM_HERE="18102017"
-
 #
 # *******************
 #   LOFAR-BF-pulsar-scripts
@@ -428,11 +440,9 @@ RUN cd ${LOFARSOFT}/src/Pulsar/apps && sudo rsync -avxP bf2format ${INSTALLDIR}/
     sudo cp 2bf2fits ${INSTALLDIR}/bin && \
     sudo g++ bf2puma2.cpp -o bf2puma2 && \
     sudo cp bf2puma2 ${INSTALLDIR}/bin
-# copying XML templates to /usr/local/etc/xml-templates, copying psrchive.cfg to /usr/local/etc, 
+# copying XML templates to /usr/local/etc/xml-templates,
 # making the link to StaticMetaData in USG trunck in our /usr/local/etc
 RUN cd ${INSTALLDIR}/etc && sudo mkdir xml-templates && sudo ln -sf ${LOFARSOFT}/data/lofar/StaticMetaData StaticMetaData && \
-    sudo cp ${LOFARSOFT}/src/Pulsar/scripts/psrchive.cfg . && \
-    sudo sed -i 's/^Predictor::default = polyco/Predictor::default = tempo2/' psrchive.cfg && \
     cd xml-templates && sudo rsync -avxP ${LOFARSOFT}/src/Pulsar/scripts/XML-MOM/ .
 # installing modified version of Sigproc's splice (to be called sigproc_splice)
 RUN cd ${INSTALLDIR}/src && sudo mkdir sigproc_splice && cd sigproc_splice && sudo cp ${LOFARSOFT}/src/Pulsar/apps/sigproc-4.3/splice.c . && \
