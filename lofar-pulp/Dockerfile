@@ -312,7 +312,8 @@ RUN cd ${INSTALLDIR}/src && sudo git clone git://git.code.sf.net/p/psrchive/code
 # WeightedFrequency::round_to_kHz = 0
 # Predictor::default = tempo2
 # Predictor::policy = default
-RUN cd ${INSTALLDIR}/etc && sudo ${INSTALLDIR}/bin/psrchive_config > psrchive.cfg && \
+RUN sudo mkdir -p ${INSTALLDIR}/etc  && cd ${INSTALLDIR}/etc && sudo touch psrchive.cfg && sudo chown root:root psrchive.cfg && \
+    sudo chmod og+w psrchive.cfg && sudo ${INSTALLDIR}/bin/psrchive_config > psrchive.cfg && \
     sudo sed -i 's/#\ FrequencyAppend::force_new_predictor\ =\ 0/FrequencyAppend::force_new_predictor\ =\ 1/' psrchive.cfg && \
     sudo sed -i 's/FrequencyAppend::weight\ =\ radiometer/FrequencyAppend::weight\ =\ none/' psrchive.cfg
 ENV PSRCHIVE="${INSTALLDIR}"
