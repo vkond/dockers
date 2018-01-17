@@ -312,13 +312,12 @@ RUN cd ${INSTALLDIR}/src && sudo git clone git://git.code.sf.net/p/psrchive/code
 # WeightedFrequency::round_to_kHz = 0
 # Predictor::default = tempo2
 # Predictor::policy = default
-ENV LD_LIBRARY_PATH="${PGPLOT_DIR}:${PRESTO}/lib:${PRESTO}/lib/python:${INSTALLDIR}/lib:/usr/lib:${SIGPROC}:${TEMPO2}/lib:${INSTALLDIR}/lib64"
+ENV PSRCHIVE="${INSTALLDIR}"
+ENV PSRCHIVE_CONFIG="${INSTALLDIR}/etc/psrchive.cfg"
 RUN sudo mkdir -p ${INSTALLDIR}/etc  && cd ${INSTALLDIR}/etc && sudo touch psrchive.cfg && sudo chown root:root psrchive.cfg && \
     sudo chmod og+w psrchive.cfg && sudo ${INSTALLDIR}/bin/psrchive_config > psrchive.cfg && \
     sudo sed -i 's/#\ FrequencyAppend::force_new_predictor\ =\ 0/FrequencyAppend::force_new_predictor\ =\ 1/' psrchive.cfg && \
     sudo sed -i 's/FrequencyAppend::weight\ =\ radiometer/FrequencyAppend::weight\ =\ none/' psrchive.cfg
-ENV PSRCHIVE="${INSTALLDIR}"
-ENV PSRCHIVE_CONFIG="${INSTALLDIR}/etc/psrchive.cfg"
 
 #
 # *******************
