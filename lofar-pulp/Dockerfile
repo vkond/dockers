@@ -314,7 +314,10 @@ RUN cd ${INSTALLDIR}/src && sudo git clone git://git.code.sf.net/p/psrchive/code
 # Predictor::policy = default
 ENV PSRCHIVE="${INSTALLDIR}"
 ENV PSRCHIVE_CONFIG="${INSTALLDIR}/etc/psrchive.cfg"
-RUN sudo mkdir -p ${INSTALLDIR}/etc  && cd ${INSTALLDIR}/etc && sudo -E ${INSTALLDIR}/bin/psrchive_config > psrchive.cfg && \
+#RUN sudo mkdir -p ${INSTALLDIR}/etc  && cd ${INSTALLDIR}/etc && sudo -E ${INSTALLDIR}/bin/psrchive_config > psrchive.cfg && \
+#    sudo sed -i 's/#\ FrequencyAppend::force_new_predictor\ =\ 0/FrequencyAppend::force_new_predictor\ =\ 1/' psrchive.cfg && \
+#    sudo sed -i 's/FrequencyAppend::weight\ =\ radiometer/FrequencyAppend::weight\ =\ none/' psrchive.cfg
+RUN sudo mkdir -p ${INSTALLDIR}/etc  && cd ${INSTALLDIR}/etc && sudo LD_LIBRARY_PATH=${LD_LIBRARY_PATH} ${INSTALLDIR}/bin/psrchive_config > psrchive.cfg && \
     sudo sed -i 's/#\ FrequencyAppend::force_new_predictor\ =\ 0/FrequencyAppend::force_new_predictor\ =\ 1/' psrchive.cfg && \
     sudo sed -i 's/FrequencyAppend::weight\ =\ radiometer/FrequencyAppend::weight\ =\ none/' psrchive.cfg
 
