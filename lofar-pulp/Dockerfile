@@ -286,9 +286,6 @@ RUN cd ${INSTALLDIR}/src && sudo cvs -z3 -d:pserver:anonymous@psrdada.cvs.source
     cd psrdada && sudo sed -i 's/mopsr\ //' Makefile.am && sudo ./bootstrap && \
     sudo ./configure --prefix=${INSTALLDIR} --enable-shared --with-x && sudo make && sudo make install
 
-# dummy variable to indicate from which line to rebuild the image
-ENV START_REBUILD_FROM_HERE="13122017"
-
 #
 # *******************
 #   PSRCHIVE
@@ -422,6 +419,9 @@ RUN cd ${INSTALLDIR}/src && sudo git clone https://github.com/vkond/LOFAR-BF-pul
     sudo sed -i "71s|%s\/release\/share\/pulsar\/data|$flaggeddir|" lofar_gain.py && \
     cd ../scheduling && scheddir="${INSTALLDIR}/etc/xml-templates" && sudo sed -i "37s|%s\/release\/share\/pulsar\/data\/templates|$scheddir|"  bfscheduler.py && \
     cd ../LTA && sudo cp Environment.cfg ${HOME}/.awe/
+
+# dummy variable to indicate from which line to rebuild the image
+ENV START_REBUILD_FROM_HERE="13022018"
 
 #
 # *******************
