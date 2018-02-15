@@ -401,6 +401,9 @@ RUN cd ${INSTALLDIR}/src && sudo wget http://www.astro-wise.org/losoft/lofar_lta
     sudo python setup.py install_oracle --prefix=${INSTALLDIR} && \
     sudo python setup.py install --prefix=${INSTALLDIR}
 
+# dummy variable to indicate from which line to rebuild the image
+ENV START_REBUILD_FROM_HERE="15022018"
+
 #
 # *******************
 #   LOFAR-BF-pulsar-scripts
@@ -419,9 +422,6 @@ RUN cd ${INSTALLDIR}/src && sudo git clone https://github.com/vkond/LOFAR-BF-pul
     sudo sed -i "71s|%s\/release\/share\/pulsar\/data|$flaggeddir|" lofar_gain.py && \
     cd ../scheduling && scheddir="${INSTALLDIR}/etc/xml-templates" && sudo sed -i "37s|%s\/release\/share\/pulsar\/data\/templates|$scheddir|"  bfscheduler.py && \
     cd ../LTA && sudo cp Environment.cfg ${HOME}/.awe/
-
-# dummy variable to indicate from which line to rebuild the image
-ENV START_REBUILD_FROM_HERE="13022018"
 
 #
 # *******************
