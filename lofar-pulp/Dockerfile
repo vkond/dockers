@@ -286,6 +286,9 @@ RUN cd ${INSTALLDIR}/src && sudo cvs -z3 -d:pserver:anonymous@psrdada.cvs.source
     cd psrdada && sudo sed -i 's/mopsr\ //' Makefile.am && sudo ./bootstrap && \
     sudo ./configure --prefix=${INSTALLDIR} --enable-shared --with-x && sudo make && sudo make install
 
+# dummy variable to indicate from which line to rebuild the image
+ENV START_REBUILD_FROM_HERE="27032018"
+
 #
 # *******************
 #   PSRCHIVE
@@ -300,25 +303,7 @@ RUN cd ${INSTALLDIR}/src && sudo git clone git://git.code.sf.net/p/psrchive/code
     sudo ./configure --prefix=/usr/local --enable-shared --with-x --with-psrcat=psrcat --with-Qt-include-dir=/usr/local/qt3/include \
        --with-Qt-bin-dir=/usr/local/qt3/bin --with-Qt-lib-dir=/usr/local/qt3/lib --with-Qt-lib=qt-mt && \
     sudo make && sudo make install
-# running psrchive_config and put the config file to /usr/local/etc/psrchive.cfg
-# and making necessary changes, such as
-# FrequencyAppend::weight change from 'radiometer' to 'none'
-# FrequencyAppend::force_new_predictor from 0 to 1
-# Other necessary parameters seem now to have good values by default, i.e.
-# Dispersion::barycentric_correction = 1
-# WeightedFrequency::round_to_kHz = 0
-# Predictor::default = tempo2
-# Predictor::policy = default
 ENV PSRCHIVE="${INSTALLDIR}"
-ENV PSRCHIVE_CONFIG="${INSTALLDIR}/etc/psrchive.cfg"
-#RUN sudo mkdir -p ${INSTALLDIR}/etc  && cd ${INSTALLDIR}/etc && sudo touch psrchive.cfg && sudo chown root:root psrchive.cfg && \
-#    sudo chmod og+w psrchive.cfg && sudo -E ${INSTALLDIR}/bin/psrchive_config > psrchive.cfg && \
-#    sudo sed -i 's/#\ FrequencyAppend::force_new_predictor\ =\ 0/FrequencyAppend::force_new_predictor\ =\ 1/' psrchive.cfg && \
-#    sudo sed -i 's/FrequencyAppend::weight\ =\ radiometer/FrequencyAppend::weight\ =\ none/' psrchive.cfg
-RUN sudo mkdir -p ${INSTALLDIR}/etc  && cd ${INSTALLDIR}/etc && sudo touch psrchive.cfg && sudo chown root:root psrchive.cfg && \
-    sudo chmod og+w psrchive.cfg && sudo LD_LIBRARY_PATH=${LD_LIBRARY_PATH} ${INSTALLDIR}/bin/psrchive_config > psrchive.cfg && \
-    sudo sed -i 's/#\ FrequencyAppend::force_new_predictor\ =\ 0/FrequencyAppend::force_new_predictor\ =\ 1/' psrchive.cfg && \
-    sudo sed -i 's/FrequencyAppend::weight\ =\ radiometer/FrequencyAppend::weight\ =\ none/' psrchive.cfg
 
 #
 # *******************
@@ -401,9 +386,6 @@ RUN cd ${INSTALLDIR}/src && sudo wget http://www.astro-wise.org/losoft/lofar_lta
     sudo python setup.py install_oracle --prefix=${INSTALLDIR} && \
     sudo python setup.py install --prefix=${INSTALLDIR}
 
-# dummy variable to indicate from which line to rebuild the image
-ENV START_REBUILD_FROM_HERE="15022018"
-
 #
 # *******************
 #   LOFAR-BF-pulsar-scripts
@@ -463,6 +445,40 @@ RUN cd ${INSTALLDIR}/bin && sudo cp ${LOFARSOFT}/src/Pulsar/scripts/digitize.py 
     cd ../etc && sudo cp ${LOFARSOFT}/src/Pulsar/scripts/header.puma2 . && \
     sudo cp ${LOFARSOFT}/src/Pulsar/scripts/lofar_default.inf . && \
     sudo rm -rf ${LOFARSOFT}/src/Pulsar/apps && sudo rm -rf ${LOFARSOFT}/src/Pulsar/external
+
+#
+# ***********************
+#  Updating psrchive.cfg
+# ***********************
+#
+# running psrchive_config and put the config file to /usr/local/etc/psrchive.cfg
+# and making necessary changes, such as
+# FrequencyAppend::weight change from 'radiometer' to 'none'
+# FrequencyAppend::force_new_predictor from 0 to 1
+# Other necessary parameters seem now to have good values by default, i.e.
+# Dispersion::barycentric_correction = 1
+# WeightedFrequency::round_to_kHz = 0
+# Predictor::default = tempo2
+# Predictor::policy = default
+ENV PSRCHIVE_CONFIG="${INSTALLDIR}/etc/psrchive.cfg"
+#RUN sudo mkdir -p ${INSTALLDIR}/etc  && cd ${INSTALLDIR}/etc && sudo touch psrchive.cfg && sudo chown root:root psrchive.cfg && \
+#    sudo chmod og+w psrchive.cfg && sudo -E ${INSTALLDIR}/bin/psrchive_config > psrchive.cfg && \
+#    sudo sed -i 's/#\ FrequencyAppend::force_new_predictor\ =\ 0/FrequencyAppend::force_new_predictor\ =\ 1/' psrchive.cfg && \
+#    sudo sed -i 's/FrequencyAppend::weight\ =\ radiometer/FrequencyAppend::weight\ =\ none/' psrchive.cfg
+RUN sudo mkdir -p ${INSTALLDIR}/etc  && cd ${INSTALLDIR}/etc && sudo touch psrchive.cfg && sudo chown root:root psrchive.cfg && \
+    sudo chmod og+w psrchive.cfg && sudo LD_LIBRARY_PATH=${LD_LIBRARY_PATH} ${INSTALLDIR}/bin/psrchive_config > psrchive.cfg && \
+    sudo sed -i 's/^Dispersion::barycentric_correction/#Dispersion::barycentric_correction/' psrchive.cfg && \
+    sudo sed -i '/^#.*Dispersion::barycentric_correction\ =/a Dispersion::barycentric_correction\ =\ 1' psrchive.cfg && \
+    sudo sed -i 's/^WeightedFrequency::round_to_kHz/#WeightedFrequency::round_to_kHz/' psrchive.cfg && \
+    sudo sed -i '/^#.*WeightedFrequency::round_to_kHz\ =/a WeightedFrequency::round_to_kHz\ =\ 0' psrchive.cfg && \
+    sudo sed -i 's/^Predictor::default/#Predictor::default/' psrchive.cfg && \
+    sudo sed -i '/^#.*Predictor::default\ =/a Predictor::default\ =\ tempo2' psrchive.cfg && \
+    sudo sed -i 's/^Predictor::policy/#Predictor::policy/' psrchive.cfg && \
+    sudo sed -i '/^#.*Predictor::policy\ =/a Predictor::policy\ =\ default' psrchive.cfg && \
+    sudo sed -i 's/^FrequencyAppend::weight/#FrequencyAppend::weight/' psrchive.cfg && \
+    sudo sed -i '/^#.*FrequencyAppend::weight\ =/a FrequencyAppend::weight\ =\ none' psrchive.cfg && \
+    sudo sed -i 's/^FrequencyAppend::force_new_predictor/#FrequencyAppend::force_new_predictor/' psrchive.cfg && \
+    sudo sed -i '/^#.*FrequencyAppend::force_new_predictor\ =/a FrequencyAppend::force_new_predictor\ =\ 1' psrchive.cfg
 
 ENV PYTHONPATH="./:${PRESTO}/lib/python:${PRESTO}/python:${INSTALLDIR}/bin:${INSTALLDIR}/src:${INSTALLDIR}/lib/python2.7/site-packages/:${INSTALLDIR}/lib/python2.7/dist-packages/:${INSTALLDIR}/src/coast_guard:${INSTALLDIR}/bin/lofar_antenna_state:${INSTALLDIR}/src/LOFAR-BF-pulsar-scripts/fluxcal:${MSCORPOL}/mscorpol:${PULP}"
 ENV LD_LIBRARY_PATH="${PGPLOT_DIR}:${PRESTO}/lib:${PRESTO}/lib/python:${INSTALLDIR}/lib:/usr/lib:${SIGPROC}:${TEMPO2}/lib:${INSTALLDIR}/lib64:${INSTALLDIR}/lib/instantclient_11_2:${INSTALLDIR}/src/dedisp-multi/lib:${INSTALLDIR}/src/dedisp/lib"
