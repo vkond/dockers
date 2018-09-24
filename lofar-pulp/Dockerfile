@@ -373,7 +373,8 @@ RUN cd ${INSTALLDIR}/src && sudo git clone https://github.com/2baOrNot2ba/mscorp
     cd mscorpol/lofar_element_response && sudo make && \
     cd ../mscorpol && sudo sed -i '1s/AntennaFieldDirectory/#AntennaFieldDirectory/' parseAntennaField.py && \
     antenna_field_dir="${INSTALLDIR}/etc/StaticMetaData/AntennaFields/" && \
-    sudo sed -i "2iAntennaFieldDirectory=\"$antenna_field_dir\"" parseAntennaField.py
+    sudo sed -i "2iAntennaFieldDirectory=\"$antenna_field_dir\"" parseAntennaField.py && \
+    sed -i "13s|\.\.|$INSTALLDIR\/src\/mscorpol|" ${INSTALLDIR}/src/mscorpol/mscorpol/HamakerJones.py
 ENV MSCORPOL="${INSTALLDIR}/src/mscorpol"
 
 #
