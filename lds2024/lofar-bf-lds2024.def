@@ -1,0 +1,88 @@
+############################################
+# Pulsar data reduction singularity recipes
+# (c) Vlad Kondratiev, May 29, 2023
+############################################
+Bootstrap: docker
+From: ubuntu:20.04
+
+# NUMBER OF PROCESSES FOR MAKE
+%environment
+    export NP=$(nproc)
+
+%post
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get -y update && apt-get -y upgrade
+    apt-get install -y python-is-python3
+    apt-get autoremove --purge
+    apt-get install -y aptitude apt-utils sudo ca-certificates \
+       python3 python3-pip python3-setuptools python3-wheel python3-tk \
+       gcc gfortran 2to3 bc
+
+%environment
+    export TZ=Europe/Amsterdam
+%post
+    export TZ=Europe/Amsterdam
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+  
+%post
+    pip3 install numpy scipy astropy matplotlib seaborn healpy scikit-learn jupyter
+    apt-get install -y python3-cartopy saods9 ftools-fv
+    apt-get install -y python3-tqdm python3-lmfit
+
+%post
+    apt-get install -y tcsh wget git vim cmake imagemagick ghostscript gv mc bcal \
+       autoconf automake libtool libgsl-dev git-svn tmux terminator texlive dialog latex2html \
+       valgrind doxygen python3-sphinx libxml2-dev libxml2-utils \
+       bison libreadline-dev libx11-dev libxt-dev libx11-6 libxt6 libyaml-cpp-dev pkg-config \
+       libglib2.0-dev libpng-dev libpng++-dev \
+       openmpi-bin libopenmpi-dev mpich libmpich-dev libhdf5-openmpi-dev libhdf5-mpich-dev \
+       locales emacs nano x11-apps
+
+#*****************************
+#   Chrome browser
+#*****************************
+%post
+    apt-get install -y fonts-liberation libu2f-udev
+    export INSTALL_DIR=/usr/local
+    cd ${INSTALL_DIR}/src && wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+    dpkg -i google-chrome-stable_current_amd64.deb
+    apt -f install
+
+#*******************
+#    HDF5 / SWIG
+#*******************
+%post
+    apt-get install -y libhdf5-103 libhdf5-dev hdf5-tools python3-h5py swig
+
+
+%post
+    locale-gen en_US.UTF-8 nl_NL.UTF-8
+
+#*****************************
+#   LOFAR BF TUTORIALS & DATA
+#*****************************
+%post
+    export INSTALL_DIR=/usr/local
+    cd ${INSTALL_DIR}/src && git clone https://github.com/cbassa/lofar_bf_tutorials.git && cd lofar_bf_tutorials && mkdir -p data && cd data
+    wget -O data.zip "https://filesender.surf.nl/download.php?token=853e3a55-c26f-4c0e-a6c1-a7ef8eafec28&files_ids=22167979%2C22167981%2C22167983%2C22167985%2C22167987%2C22167989%2C22167991%2C22167993%2C22167995%2C22167997%2C22167999%2C22168001%2C22168003%2C22168005%2C22168007%2C22168009%2C22168011%2C22168013%2C22168015%2C22168017%2C22168019%2C22168021%2C22168025%2C22168029%2C22168033%2C22168037%2C22168039%2C22168041%2C22168043%2C22168045%2C22168047%2C22168049%2C22168051%2C22168053%2C22168055%2C22168057%2C22168059%2C22168061%2C22168063%2C22168065%2C22168067%2C22168069%2C22168071%2C22168073%2C22168075%2C22168077%2C22168079%2C22168081%2C22168083%2C22168085%2C22168087%2C22168089%2C22168091%2C22168093%2C22168095%2C22168097%2C22168099%2C22168101%2C22168103%2C22168105%2C22168107%2C22168109%2C22168111%2C22168113%2C22168115%2C22168117%2C22168119%2C22168121%2C22168123%2C22168125%2C22168127%2C22168129%2C22168131%2C22168133%2C22168135%2C22168137%2C22168139%2C22168141%2C22168143%2C22168145%2C22168147%2C22168149%2C22168151%2C22168153%2C22168155%2C22168157%2C22168159%2C22168161%2C22168163%2C22168165%2C22168167%2C22168169%2C22168171%2C22168173%2C22168175%2C22168177%2C22168179%2C22168181%2C22168183%2C22168185%2C22168187%2C22168189%2C22168191%2C22168193%2C22168195%2C22168197%2C22168199%2C22168201%2C22168203%2C22168205%2C22168207%2C22168209%2C22168211%2C22168213%2C22168215%2C22168217%2C22168219%2C22168221%2C22168223%2C22168225%2C22168227%2C22168229%2C22168231%2C22168233%2C22168235%2C22168237%2C22168239%2C22168241%2C22168243%2C22168245%2C22168247%2C22168249%2C22168251%2C22168253%2C22168255%2C22168257%2C22168259%2C22168261%2C22168263%2C22168265%2C22168267%2C22168269%2C22168271%2C22168273%2C22168275%2C22168277%2C22168279%2C22168281%2C22168283%2C22168285%2C22168287%2C22168289%2C22168291%2C22168293%2C22168295%2C22168297%2C22168299%2C22168301%2C22168303%2C22168305%2C22168307%2C22168309%2C22168311%2C22168313%2C22168315%2C22168317%2C22168319%2C22168321%2C22168323%2C22168325%2C22168327%2C22168329%2C22168331%2C22168333%2C22168335%2C22168337%2C22168339%2C22168341%2C22168343%2C22168345%2C22168347%2C22168349%2C22168351%2C22168353%2C22168355%2C22168357%2C22168359%2C22168361%2C22168363%2C22168365%2C22168367%2C22168369%2C22168371%2C22168373%2C22168375%2C22168377%2C22168379%2C22168381%2C22168383%2C22168385%2C22168387%2C22168389%2C22168391%2C22168393%2C22168395%2C22168397%2C22168399%2C22168401%2C22168403%2C22168405%2C22168407%2C22168409%2C22168411%2C22168413%2C22168415%2C22168417%2C22168419%2C22168421%2C22168423%2C22168425%2C22168427%2C22168429%2C22168431%2C22168433%2C22168435%2C22168437%2C22168439%2C22168441"
+    unzip data.zip && rm -f data.zip
+
+%environment
+    export INSTALL_DIR=/usr/local
+    export PATH=${INSTALL_DIR}/bin:${PATH}
+    export LD_LIBRARY_PATH=${INSTALL_DIR}/lib:${LD_LIBRARY_PATH}
+    export PYTHONPATH=${INSTALL_DIR}/lib/python3/dist-packages
+    export LANG=en_US.UTF-8
+    export LANGUAGE=en_US.UTF-8
+    export LC_ALL=en_US.UTF-8
+
+%labels
+    Author Vlad Kondratiev
+    Version v0.9
+
+%help
+    This is a container for pulsar work on a dedicated workstation
+    
+%runscript
+    alias ls="ls -F --color"
+    python3 -c 'print("Hello!\nWelcome to my pulsar singularity container.\nYours,\n        Vlad!")'
