@@ -1,0 +1,170 @@
+############################################
+# Pulsar data reduction singularity recipes
+# (c) Vlad Kondratiev, May 29, 2023
+############################################
+Bootstrap: localimage
+From: deduction101.sif
+
+#*******************
+#      PGPLOT
+#*******************
+%post
+    apt-get install -y pgplot5 libcpgplot0
+
+%environment
+    export PGPLOT_BACKGROUND=white
+    export PGPLOT_DEV=/xwin
+    export PGPLOT_DIR=/usr/lib/pgplot5
+    export PGPLOT_FONT=/usr/lib/pgplot5/grfont.dat
+    export PGPLOT_FOREGROUND=black
+    export PGPLOT_INCLUDES=/usr/include
+
+
+#*******************
+#      FFTW
+#*******************
+%post
+    export FFTW_VERSION="3.3.10"
+    export INSTALL_DIR=/usr/local
+    cd ${INSTALL_DIR}/src && wget --retry-connrefused ftp://ftp.fftw.org/pub/fftw/fftw-${FFTW_VERSION}.tar.gz && \
+        tar xvfz fftw-${FFTW_VERSION}.tar.gz && rm -f fftw-${FFTW_VERSION}.tar.gz && cd fftw-${FFTW_VERSION}
+    # float (single) precision
+    ./configure CFLAGS=-fPIC FFLAGS=-fPIC --prefix=${INSTALL_DIR} --enable-shared --enable-threads --enable-single  --enable-sse --enable-sse2
+    make -j${NP} && make install && make distclean
+    # double precision
+    ./configure CFLAGS=-fPIC FFLAGS=-fPIC --prefix=${INSTALL_DIR} --enable-shared --enable-threads --enable-sse2
+    make -j${NP} && make install && make distclean
+    # long double precision
+    ./configure CFLAGS=-fPIC FFLAGS=-fPIC --prefix=${INSTALL_DIR} --enable-shared --enable-threads --enable-long-double
+    make -j${NP} && make install && make distclean
+    # quadruple precision
+    ./configure CFLAGS=-fPIC FFLAGS=-fPIC --prefix=${INSTALL_DIR} --enable-shared --enable-threads --enable-quad-precision
+    make -j${NP} && make install && make distclean
+
+#*******************
+#    CFITSIO
+#*******************
+%post
+    export CFITSIO_VERSION="4.2.0"
+    cd ${INSTALL_DIR}/src && wget --retry-connrefused http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-${CFITSIO_VERSION}.tar.gz && \
+        tar xvfz cfitsio-${CFITSIO_VERSION}.tar.gz && rm -f cfitsio-${CFITSIO_VERSION}.tar.gz && cd cfitsio-${CFITSIO_VERSION}
+    ./configure CFLAGS=-fPIC FFLAGS=-fPIC --prefix=${INSTALL_DIR} --enable-sse2 --enable-ssse3
+    make -j${NP} && make install && make distclean
+
+#*******************
+#    HDF5 / SWIG
+#*******************
+%post
+    apt-get install -y libhdf5-103 libhdf5-dev hdf5-tools python3-h5py swig 
+
+#*******************
+#    DAL2
+#*******************
+%post
+    # cloning branch with Python3 support
+    cd ${INSTALL_DIR}/src && git clone -b python3-support https://git.astron.nl/ro/dal2.git && cd dal2
+    mkdir build && cd build
+    cmake -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} ..
+    ###cmake -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DPYTHON_LIBRARIES=/usr/lib/x86_64-linux-gnu -DPYTHON_INCLUDE_DIRS=/usr/include/python3.8 ..
+    make -j${NP}
+    sed -i -e 's|/usr/lib/python3|/usr/local/lib/python3|g' dal/cmake_install.cmake
+    sed -i -e 's|/usr/local/src/dal2/dal/__init__.py|/usr/local/src/dal2/build/dal/__init__.py|g' dal/cmake_install.cmake
+    sed -i -e 's|/usr/lib/python3|/usr/local/lib/python3|g' dal/utils/lib/cmake_install.cmake
+    make install
+    ctest
+
+#*******************
+#      GIZA (Lightweight scientific plotting library)
+#      Commented out as it replaces the PGPLOT library - we are using PGPLOT for now...
+#*******************
+#%post
+#    apt-get install -y libgiza0 giza-dev
+
+#*******************
+#      ARMADILLO (streamlined C++ linear algebra library)
+#*******************
+%post
+    #apt-get install -y libarmadillo9 libarmadillo-dev
+    export ARMADILLO_VERSION="12.6.1"
+    cd ${INSTALL_DIR}/src && wget http://sourceforge.net/projects/arma/files/armadillo-${ARMADILLO_VERSION}.tar.xz && \
+        unxz armadillo-${ARMADILLO_VERSION}.tar.xz && tar xvf armadillo-${ARMADILLO_VERSION}.tar && \
+        rm -f armadillo-${ARMADILLO_VERSION}.tar && cd armadillo-${ARMADILLO_VERSION}
+    cmake . -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}
+    make -j${NP} && make install
+
+#*******************
+#      SPLINTER
+#*******************
+%post
+    cd ${INSTALL_DIR}/src && git clone https://github.com/bgrimstad/splinter && cd splinter
+    mkdir build && cd build
+    export CXX=$(which g++)
+    cmake -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} ..
+    make -j${NP} && make install
+
+#*******************
+#      EIGEN (lightweight C++ template library for linear algebra)
+#*******************
+%post
+    #apt-get install -y libeigen3-dev
+    cd ${INSTALL_DIR}/src && git clone https://gitlab.com/libeigen/eigen.git eigen && cd eigen
+    git reset --hard 3147391d   # was set in the Golams EPTA singularity repo
+    mkdir build && cd build
+    cmake -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} ..
+    make -j${NP} && make install
+
+#*******************
+#      QD
+#*******************
+%post
+    cd ${INSTALL_DIR}/src && git clone https://github.com/highprecision/QD qd && cd qd
+    aclocal && libtoolize --copy --force && autoconf && autoheader && automake -a -c
+    ./configure CFLAGS=-fPIC FFLAGS=-fPIC --prefix=${INSTALL_DIR} --enable-shared
+    make -j${NP} && make check && make install && make distclean
+
+#*******************
+#      SOFA
+#*******************
+%post
+    export SOFA_VERSION="20210512"
+    export SV1=`echo ${SOFA_VERSION} | head -c 4`
+    export SV2=`echo ${SOFA_VERSION} | tail -c 5`
+    cd ${INSTALL_DIR}/src && wget --no-check-certificate https://www.iausofa.org/${SV1}_${SV2}_F/sofa_f-${SOFA_VERSION}.tar.gz && \
+        wget --no-check-certificate https://www.iausofa.org/${SV1}_${SV2}_C/sofa_c-${SOFA_VERSION}.tar.gz && \
+        tar xvfz sofa_f-${SOFA_VERSION}.tar.gz && tar xvfz sofa_c-${SOFA_VERSION}.tar.gz && \
+        rm -f sofa_f-${SOFA_VERSION}.tar.gz sofa_c-${SOFA_VERSION}.tar.gz
+    cd ${INSTALL_DIR}/src && cd sofa && cd ${SOFA_VERSION}
+    cd c/src
+    sed -i -e "s|^INSTALL_DIR = \$(HOME)|INSTALL_DIR = ${INSTALL_DIR}|g" makefile
+    make -j${NP} && make test && make install && make distclean
+    cd ../../f77/src
+    sed -i -e "s|^INSTALL_DIR = \$(HOME)|INSTALL_DIR = ${INSTALL_DIR}|g" makefile
+    make -j${NP} && make test && make install && make distclean
+
+#*******************
+#     PSRDADA
+#*******************
+%post
+    cd ${INSTALL_DIR}/src && git clone https://git.code.sf.net/p/psrdada/code psrdada && cd psrdada
+    ./bootstrap && ./configure CFLAGS=-fPIC FFLAGS=-fPIC --prefix=${INSTALL_DIR} --enable-shared
+    make -j${NP} && make install && make distclean
+
+#*******************
+#     CALCEPH
+#*******************
+%post
+    export CALCEPH_VERSION="3.5.2"
+    cd ${INSTALL_DIR}/src && wget --retry-connrefused https://www.imcce.fr/content/medias/recherche/equipes/asd/calceph/calceph-${CALCEPH_VERSION}.tar.gz
+    tar xvfz calceph-${CALCEPH_VERSION}.tar.gz && rm -f calceph-${CALCEPH_VERSION}.tar.gz && cd calceph-${CALCEPH_VERSION}
+    ./configure CFLAGS=-fPIC FFLAGS=-fPIC --prefix=${INSTALL_DIR} --enable-fortran --enable-shared --enable-static --enable-thread --with-pic
+    make -j${NP} && make check && make install && make distclean
+
+#*******************
+#      PSRXML
+#*******************
+%post
+    cd ${INSTALL_DIR}/src && git clone https://github.com/SixByNine/psrxml && cd psrxml
+    sed -i -e 's/@OPENSSL_LIBS@//g' src/tools/Makefile.am && sed -i -e 's/@OPENSSL_LIBS@//g' src/tests/Makefile.am
+    aclocal && libtoolize --copy --force && autoconf && autoheader && automake -a -c
+    ./configure CFLAGS=-fPIC FFLAGS=-fPIC --prefix=${INSTALL_DIR} --enable-shared
+    make -j${NP} && make install && make distclean
