@@ -36,7 +36,7 @@ From: ubuntu:20.04
        bison libreadline-dev libx11-dev libxt-dev libx11-6 libxt6 libyaml-cpp-dev pkg-config \
        libglib2.0-dev libpng-dev libpng++-dev \
        openmpi-bin libopenmpi-dev mpich libmpich-dev libhdf5-openmpi-dev libhdf5-mpich-dev \
-       locales
+       locales subversion rsync
 
 %post
     apt install -y software-properties-common apt-transport-https
