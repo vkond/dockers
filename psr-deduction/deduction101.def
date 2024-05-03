@@ -59,7 +59,7 @@ From: ubuntu:20.04
 
 %labels
     Author Vlad Kondratiev
-    Version v0.9
+    Version v0.91
 
 %help
     This is a container for pulsar work on a dedicated workstation
