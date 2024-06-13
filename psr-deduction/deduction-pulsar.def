@@ -133,17 +133,6 @@ From: deduction-pre-pulsar.sif
     make && make install && make distclean
 
 #*******************
-#     DSPSR
-#*******************
-%post
-    cd ${INSTALL_DIR}/src && git clone git://git.code.sf.net/p/dspsr/code dspsr
-    cd dspsr && ./bootstrap
-    echo "apsr asp bcpm bpsr caspsr cpsr cpsr2 dada dummy fits gmrt guppi kat lbadr lbadr64 lofar_dal lump lwa mark4 mark5 mark5b maxim mwa pdev pmdaq puma2 s2 sigproc ska1 spda1k spigot vdif" > backends.list
-    #./configure PYTHON=/usr/bin/python3 --prefix=${INSTALL_DIR} --enable-shared --with-x --with-hdf5-incdir=/usr/include/hdf5/serial --with-hdf5-libdir=/usr/lib/x86_64-linux-gnu/hdf5/serial --x-includes=/usr/include/X11 --x-libraries=/usr/lib/x86_64-linux-gnu --with-mpi --with-mpi-inc-dir=/usr/include/x86_64-linux-gnu/mpich --with-mpi-lib-dir=/usr/lib/x86_64-linux-gnu
-    ./configure PYTHON=/usr/bin/python3 --prefix=${INSTALL_DIR} --enable-shared --with-x --with-hdf5-incdir=/usr/include/hdf5/serial --with-hdf5-libdir=/usr/lib/x86_64-linux-gnu/hdf5/serial --x-includes=/usr/include/X11 --x-libraries=/usr/lib/x86_64-linux-gnu
-    make -j${NP} && make install && make distclean
-
-#*******************
 #  PYTHON-CASACORE
 #*******************
 %post
@@ -228,32 +217,6 @@ From: deduction-pre-pulsar.sif
     make && make install && make distclean
 
 #*******************
-#      PRESTO
-#*******************
-%post
-    export PRESTO=${INSTALL_DIR}/src/presto
-    cd ${INSTALL_DIR}/src && git clone https://github.com/scottransom/presto.git
-    cd ${PRESTO}/src && make PRESTO=${PRESTO} makewisdom
-    cp fftw_wisdom.txt ${INSTALL_DIR}/etc
-    make PRESTO=${PRESTO} prep
-    make PRESTO=${PRESTO} LD_LIBRARY_PATH=${PRESTO}/lib PGPLOT_DIR=${PGPLOT_DIR}
-    make PRESTO=${PRESTO} mpi
-    cd slalib
-    rm *.o
-    gfortran -fPIC -g -O2 -fno-second-underscore -c -I. *.f *.F
-    rm sla_test.o
-    gfortran -shared -o libsla.so -fno-second-underscore -g *.o
-    gfortran -o sla_test sla_test.f -fno-second-underscore -L. -lsla
-    ./sla_test
-    cp libsla.so ${INSTALL_DIR}/lib
-    cd ${PRESTO} && pip3 install --prefix=${INSTALL_DIR} .
-    cd ${PRESTO}/src && make clean
-
-%environment
-    export PRESTO=${INSTALL_DIR}/src/presto
-    export PATH=${PRESTO}/bin:${PATH}
-
-#*******************
 #     pySLALIB
 #*******************
 %post
@@ -274,7 +237,7 @@ From: deduction-pre-pulsar.sif
 
 %labels
     Author Vlad Kondratiev
-    Version v0.9
+    Version v0.92
 
 %help
     This is a container for pulsar work on a dedicated workstation

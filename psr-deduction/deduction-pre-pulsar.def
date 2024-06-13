@@ -52,19 +52,13 @@ From: deduction101.sif
     make -j${NP} && make install && make distclean
 
 #*******************
-#    HDF5 / SWIG
-#*******************
-%post
-    apt-get install -y libhdf5-103 libhdf5-dev hdf5-tools python3-h5py swig 
-
-#*******************
 #    DAL2
 #*******************
 %post
     # cloning branch with Python3 support
     cd ${INSTALL_DIR}/src && git clone -b python3-support https://git.astron.nl/ro/dal2.git && cd dal2
     mkdir build && cd build
-    cmake -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} ..
+    cmake -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DGENERATE_DOCS=OFF ..
     ###cmake -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DPYTHON_LIBRARIES=/usr/lib/x86_64-linux-gnu -DPYTHON_INCLUDE_DIRS=/usr/include/python3.8 ..
     make -j${NP}
     sed -i -e 's|/usr/lib/python3|/usr/local/lib/python3|g' dal/cmake_install.cmake

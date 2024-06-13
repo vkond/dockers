@@ -1,0 +1,28 @@
+############################################
+# Pulsar data reduction singularity recipes
+# (c) Vlad Kondratiev, May 29, 2023
+############################################
+Bootstrap: localimage
+From: deduction-pulsar.sif
+
+#*******************
+#     DSPSR
+#*******************
+%post
+    cd ${INSTALL_DIR}/src && git clone git://git.code.sf.net/p/dspsr/code dspsr
+    cd dspsr && ./bootstrap
+    echo "apsr asp bcpm bpsr caspsr cpsr cpsr2 dada dummy fits gmrt guppi kat lbadr lbadr64 lofar_dal lump lwa mark4 mark5 mark5b maxim mwa pdev pmdaq puma2 s2 sigproc ska1 spda1k spigot vdif" > backends.list
+    #./configure PYTHON=/usr/bin/python3 --prefix=${INSTALL_DIR} --enable-shared --with-x --with-hdf5-incdir=/usr/include/hdf5/serial --with-hdf5-libdir=/usr/lib/x86_64-linux-gnu/hdf5/serial --x-includes=/usr/include/X11 --x-libraries=/usr/lib/x86_64-linux-gnu --with-mpi --with-mpi-inc-dir=/usr/include/x86_64-linux-gnu/mpich --with-mpi-lib-dir=/usr/lib/x86_64-linux-gnu
+    ./configure PYTHON=/usr/bin/python3 --prefix=${INSTALL_DIR} --enable-shared --with-x --with-hdf5-incdir=/usr/include/hdf5/serial --with-hdf5-libdir=/usr/lib/x86_64-linux-gnu/hdf5/serial --x-includes=/usr/include/X11 --x-libraries=/usr/lib/x86_64-linux-gnu
+    make -j${NP} && make install && make distclean
+
+%labels
+    Author Vlad Kondratiev
+    Version v0.92
+
+%help
+    This is a container for pulsar work on a dedicated workstation
+    
+%runscript
+    alias ls="ls -F --color"
+    python3 -c 'print("Hello!\nWelcome to my pulsar singularity container.\nYours,\n        Vlad!")'
