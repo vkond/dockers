@@ -1,0 +1,247 @@
+############################################
+# Pulsar data reduction singularity recipes
+# (c) Vlad Kondratiev, May 29, 2023
+############################################
+Bootstrap: localimage
+From: deduction-pre-pulsar.sif
+
+#*******************
+#      PSRCAT 
+#*******************
+%post
+    cd ${INSTALL_DIR}/src && wget --retry-connrefused --no-check-certificate https://www.atnf.csiro.au/research/pulsar/psrcat/downloads/psrcat_pkg.tar.gz
+    tar xvfz psrcat_pkg.tar.gz && rm -f psrcat_pkg.tar.gz && cd psrcat_tar
+    sed -i -e 's|/usr/bin/gcc|/usr/bin/gcc -fcommon|g' makeit
+    /bin/bash ./makeit
+    cd ${INSTALL_DIR}/lib && ln -sf ${INSTALL_DIR}/src/psrcat_tar/libpsrcat.a .
+    cd ${INSTALL_DIR}/bin && ln -sf ${INSTALL_DIR}/src/psrcat_tar/psrcat . && \
+        ln -sf ${INSTALL_DIR}/src/psrcat_tar/psrcat.db . && ln -sf ${INSTALL_DIR}/src/psrcat_tar/glitch.db .
+    
+%environment
+    export PSRCAT_FILE="${INSTALL_DIR}/bin/psrcat.db"
+
+#*******************
+#      TEMPO 
+#*******************
+%post
+    cd ${INSTALL_DIR}/src && git clone http://git.code.sf.net/p/tempo/tempo && cd tempo
+    ### saving original obsys.dat in .orig
+    mv obsys.dat obsys.dat.orig
+    ### removing telescopes whose codes are the same as for NenuFAR/LOFAR stations
+    ### should be soon handled by having all NenuFAR/Intl stations added in the main repo
+    ### (they have disappeared from there for some reason)
+    cat obsys.dat.orig | grep -v CHIME | grep -v LWA1 | grep -v MWA | grep -v z > obsys.dat
+    ### adding NenuFAR/LOFAR telescopes
+    echo "3307865.236    2487350.541      4836939.784    1  UTR-2               w  U2" >> obsys.dat
+    echo "4324016.70769  165545.525467    4670271.363    1  NenuFAR             n  NF" >> obsys.dat
+    echo "4324016.70769  165545.525467    4670271.363    1  FR606               u  FL" >> obsys.dat
+    echo "4034100.228    487013.084       4900229.363    1  DE601               x  DL" >> obsys.dat
+    echo "4008462.280    -100376.948      4943716.600    1  UK608               y  UL" >> obsys.dat
+    echo "3370272.092     712125.596      5349990.934    1  SE607               z  SL" >> obsys.dat
+    chmod 644 obsys.dat
+    /bin/bash ./prepare && ./configure --prefix=${INSTALL_DIR}
+    make -j${NP} && make install
+    awk '{print $(NF-1), $0}' obsys.dat | sort -V | cut -d\  -f2-
+
+%environment
+    export TEMPO="${INSTALL_DIR}/src/tempo"
+
+#*******************
+#     TEMPO2
+#*******************
+%post
+    cd ${INSTALL_DIR}/src && git clone https://bitbucket.org/psrsoft/tempo2.git && cd tempo2
+    git reset --hard d56c885   # was set in the Golams EPTA singularity repo
+    ./bootstrap
+    export TEMPO2="${INSTALL_DIR}/share/tempo2"
+    export TEMPO2_PLUG_PATH=${TEMPO2}/plugins
+    ./configure CPPFLAGS="-I${INSTALL_DIR}/include" LDFLAGS="-L${INSTALL_DIR}/lib -L/usr/lib/x86_64-linux-gnu" --prefix=${INSTALL_DIR} --with-tempo2-plug-dir=${TEMPO2_PLUG_PATH} --enable-shared --enable-static --with-pic --with-x --with-calceph=-lcalceph --with-blas=-lblas --x-includes=/usr/include/X11 --x-libraries=/usr/lib/x86_64-linux-gnu
+    make -j${NP} && make install
+    make -j${NP} plugins && make plugins-install
+    cp -r T2runtime/* ${TEMPO2}
+    ln -s ${TEMPO2}/ephemeris/inpop19a_TDB_m100_p100_bigendian.dat ${TEMPO2}/ephemeris/INPOP19a
+    ln -s ${TEMPO2}/ephemeris/inpop19a_TDB_m100_p100_bigendian.dat ${TEMPO2}/ephemeris/INPOP19a.1950.2050
+    ### modifying telescopes codes to add NenuFAR/LOFAR to aliases/observatory.dat
+    ### should be soon handled by having all of them in the main repo
+    ### (it had disappeared from there for some reason)
+    cd ${TEMPO2}/observatory
+    ### aliases
+    mv aliases aliases.orig
+    cat aliases.orig | grep -v "srt z" | grep -v defford > aliases
+    echo "FRlfr u" >> aliases
+    echo "ONlfr z" >> aliases
+    echo "nenufar n nf" >> aliases
+    ### tempo.aliases
+    mv tempo.aliases tempo.aliases.orig
+    cat tempo.aliases.orig | grep -v SR | grep -v MW > tempo.aliases
+    echo "FRlfr      u  FR" >> tempo.aliases
+    echo "ONlfr      z  ON" >> tempo.aliases
+    echo "nenufar    n  NF" >> tempo.aliases
+    ### observatories.dat
+    cp observatories.dat observatories.dat.orig
+    sed -i '81i# NenuFAR\n\ 4324017.054    165545.160      4670271.072      NENUFAR             nenufar' observatories.dat
+
+%environment
+    export TEMPO2="${INSTALL_DIR}/share/tempo2"
+    export TEMPO2_PLUG_PATH=${TEMPO2}/plugins/
+
+#*******************
+#      EPSIC 
+#*******************
+%post
+    cd ${INSTALL_DIR}/src && git clone https://github.com/straten/epsic
+    cd epsic && cd src && ./bootstrap && ./configure CFLAGS=-fPIC FFLAGS=-fPIC --prefix=${INSTALL_DIR} --enable-shared
+    make -j${NP} && make install && make distclean
+
+#*******************
+#     PSRCHIVE
+#*******************
+%post
+    cd ${INSTALL_DIR}/src && git clone http://git.code.sf.net/p/psrchive/code psrchive
+    cd psrchive && ./bootstrap
+    #./configure PYTHON=/usr/bin/python3 --prefix=${INSTALL_DIR} --enable-shared --with-x --with-psrcat=psrcat --with-psrxml-dir=${INSTALL_DIR}/lib --with-eigen-include-dir=${INSTALL_DIR}/include/eigen3 --with-eigen-dir=${INSTALL_DIR}/src/eigen --with-splinter-lib-dir=${INSTALL_DIR}/lib --with-splinter-include-dir=${INSTALL_DIR}/inclide/SPLINTER --x-libraries=/usr/lib/x86_64-linux-gnu --x-includes=/usr/include/X11 --with-mpi --with-mpi-inc-dir=/usr/include/x86_64-linux-gnu/mpich --with-mpi-lib-dir=/usr/lib/x86_64-linux-gnu
+    ./configure PYTHON=/usr/bin/python3 --prefix=${INSTALL_DIR} --enable-shared --with-x --with-psrcat=psrcat --with-psrxml-dir=${INSTALL_DIR}/lib --with-eigen-include-dir=${INSTALL_DIR}/include/eigen3 --with-eigen-dir=${INSTALL_DIR}/src/eigen --with-splinter-lib-dir=${INSTALL_DIR}/lib --with-splinter-include-dir=${INSTALL_DIR}/inclide/SPLINTER --x-libraries=/usr/lib/x86_64-linux-gnu --x-includes=/usr/include/X11
+    make -j${NP} && make install && make distclean
+    export PSRCHIVE_CONFIG=${INSTALL_DIR}/etc/psrchive.cfg
+    ${INSTALL_DIR}/bin/psrchive_config > $PSRCHIVE_CONFIG
+    sed -i 's/^Dispersion::barycentric_correction/#Dispersion::barycentric_correction/' $PSRCHIVE_CONFIG
+    sed -i '/^#.*Dispersion::barycentric_correction\ =/a Dispersion::barycentric_correction\ =\ 1' $PSRCHIVE_CONFIG
+    sed -i 's/^WeightedFrequency::round_to_kHz/#WeightedFrequency::round_to_kHz/' $PSRCHIVE_CONFIG
+    sed -i '/^#.*WeightedFrequency::round_to_kHz\ =/a WeightedFrequency::round_to_kHz\ =\ 0' $PSRCHIVE_CONFIG
+    sed -i 's/^Predictor::default/#Predictor::default/' $PSRCHIVE_CONFIG
+    sed -i '/^#.*Predictor::default\ =/a Predictor::default\ =\ tempo2' $PSRCHIVE_CONFIG
+    sed -i 's/^Predictor::policy/#Predictor::policy/' $PSRCHIVE_CONFIG
+    sed -i '/^#.*Predictor::policy\ =/a Predictor::policy\ =\ default' $PSRCHIVE_CONFIG
+    sed -i 's/^FrequencyAppend::weight/#FrequencyAppend::weight/' $PSRCHIVE_CONFIG
+    sed -i '/^#.*FrequencyAppend::weight\ =/a FrequencyAppend::weight\ =\ none' $PSRCHIVE_CONFIG
+    sed -i 's/^FrequencyAppend::force_new_predictor/#FrequencyAppend::force_new_predictor/' $PSRCHIVE_CONFIG
+    sed -i '/^#.*FrequencyAppend::force_new_predictor\ =/a FrequencyAppend::force_new_predictor\ =\ 1' $PSRCHIVE_CONFIG
+    sed -i 's/^ArrivalTime::default_format/#ArrivalTime::default_format/' $PSRCHIVE_CONFIG
+    sed -i '/^#.*ArrivalTime::default_format\ =/a ArrivalTime::default_format\ =\ Tempo2' $PSRCHIVE_CONFIG
+
+%environment
+    export PYTHONPATH=/usr/local/lib/python3.8/site-packages:${PYTHONPATH}
+    export PSRCHIVE_CONFIG=${INSTALL_DIR}/etc/psrchive.cfg
+
+#*******************
+#     MARK5ACCESS 
+#*******************
+%post
+    cd ${INSTALL_DIR}/src && git clone https://github.com/demorest/mark5access
+    cd mark5access && aclocal && libtoolize --copy --force && autoconf && autoheader && automake -a -c
+    ./configure --prefix=${INSTALL_DIR}
+    make && make install && make distclean
+
+#*******************
+#  PYTHON-CASACORE
+#*******************
+%post
+    apt -y install   python3-casacore
+    export DATA_DIR=${INSTALL_DIR}/share/casacore/data
+    mkdir -p ${DATA_DIR}
+    cd ${DATA_DIR} && \
+        wget --retry-connrefused ftp://ftp.astron.nl/outgoing/Measures/WSRT_Measures.ztar && \
+        tar xf WSRT_Measures.ztar && rm -f WSRT_Measures.ztar
+
+%environment
+    export DATA_DIR=${INSTALL_DIR}/share/casacore/data
+
+#*******************
+#     ANTPAT
+#*******************
+%post
+    cd ${INSTALL_DIR}/src && git clone https://github.com/2baOrNot2ba/AntPat
+    cd AntPat
+    python3 setup.py install --prefix=${INSTALL_DIR}
+
+#*******************
+#     DREAMBEAM
+#*******************
+%post
+    cd ${INSTALL_DIR}/src && git clone https://github.com/2baOrNot2ba/dreamBeam.git
+    cd dreamBeam
+    python3 setup.py install --prefix=${INSTALL_DIR}
+
+#*******************
+#    COAST_GUARD
+#*******************
+%post
+    cd ${INSTALL_DIR}/src && git clone https://github.com/plazar/coast_guard
+    cd coast_guard
+    2to3 -w *.py
+    cd database && 2to3 -w *.py
+    cd ../cleaners && 2to3 -w *.py
+
+%environment
+    export PYTHONPATH=${INSTALL_DIR}/src:${INSTALL_DIR}/src/coast_guard:${PYTHONPATH}
+    export PATH=${INSTALL_DIR}/src/coast_guard:${PATH}
+    export COASTGUARD_CFG="${INSTALL_DIR}/src/coast_guard/configurations"
+
+#*******************
+#    SIGPROC
+#*******************
+%post
+    export OSTYPE=linux
+    export customcfg="makefile.${OSTYPE}"
+    cd ${INSTALL_DIR}/src && wget -O sigproc-4.3.tar.gz --retry-connrefused "http://downloads.sourceforge.net/project/sigproc/sigproc/4.3/sigproc-4.3.tar.gz?r=http%3A%2F%2Fsigproc.sourceforge.net%2F&amp;ts=1483801820&amp;use_mirror=freefr"
+    tar xvfz sigproc-4.3.tar.gz && cd sigproc-4.3 && \
+    sed -i 's/$<//' configure && ./configure && \
+    sed -i 's/-L\/usr\/X11R6\/lib/-L\/usr\/lib\/x86_64-linux-gnu\//' ${customcfg} && \
+    sed -i '9iLFITS = -L/usr/lib -lcfitsio' ${customcfg} && \
+    sed -i '10iLFFTW = -L/usr/local/lib/ -lfftw3 -lfftw3f' ${customcfg} && \
+    sed -i '11iFC = gfortran -ffixed-line-length-none' ${customcfg} && \
+    sed -i "265s/DB\\\\'s/DBs/" dosearch.f && \
+    sed -i '452s/export\ :/export:/' makefile && \
+    sed -i 's/$(OSTYPE)/linux/' makefile && \
+    sed -i 's/ar\ rv/ar\ rvU/' makefile && \
+    sed -i 's/$(LPGPLOT)/-L\/usr\/local\/lib\ -lpgplot\ -lcpgplot\ -L\/usr\/lib\/x86_64-linux-gnu\/\ -lX11/' makefile && \
+    sed -i 's/$(LFITS)/-L\/usr\/lib\ -lcfitsio/' makefile && \
+    sed -i 's/$(LFFTW)/-L\/usr\/local\/lib\/\ -lfftw3\ -lfftw3f/' makefile && \
+    make  && make quickplot && make extract && make gmrt2fil && \
+    make flatten && make clip && make downsample && make readchunk && \
+    make splitter && make snrdm && make dice && make depolyco && \
+    make brute && make tree && make pgplotter && make sumfft && \
+    make peak && make ffa && make spec && make makedummy && \
+    cp libsigproc_linux.a ${INSTALL_DIR}/lib
+
+%environment
+    export PATH=${INSTALL_DIR}/src/sigproc-4.3:${PATH}
+
+#*******************
+#   PSRFITS_UTILS
+#*******************
+%post
+    cd ${INSTALL_DIR}/src && git clone https://github.com/demorest/psrfits_utils
+    cd psrfits_utils && sed -i 's/-Werror\ //' configure.ac && ./prepare
+    ./configure --prefix=${INSTALL_DIR}
+    make && make install && make distclean
+
+#*******************
+#     pySLALIB
+#*******************
+%post
+    pip3 install --prefix=${INSTALL_DIR} unittest-xml-reporting
+    cd ${INSTALL_DIR}/src && wget -O pySLALIB-1.0.7.tar.gz --retry-connrefused "https://files.pythonhosted.org/packages/16/21/f0d7be29d43e3b7308b39bfa921c83a3191cfff7684156b6e7bade031b1a/pySLALIB-1.0.7.tar.gz"
+    tar xvfz pySLALIB-1.0.7.tar.gz && cd pySLALIB-1.0.7
+    python3 setup.py install --prefix=${INSTALL_DIR}
+    python3 test/test_slalib.py
+
+#*******************
+#   GaussPy  
+#*******************
+%post
+    cd ${INSTALL_DIR}/src && git clone https://github.com/gausspy/gausspy.git
+    cd gausspy
+    python3 setup.py install
+    sed -i s/np.float/float/g /usr/lib/python3/dist-packages/lmfit/models.py
+
+%labels
+    Author Vlad Kondratiev
+    Version v0.92
+
+%help
+    This is a container for pulsar work on a dedicated workstation
+    
+%runscript
+    alias ls="ls -F --color"
+    python3 -c 'print("Hello!\nWelcome to my pulsar singularity container.\nYours,\n        Vlad!")'
