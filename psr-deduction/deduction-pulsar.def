@@ -17,8 +17,9 @@ From: deduction-pre-pulsar.sif
     cd ${INSTALL_DIR}/bin && ln -sf ${INSTALL_DIR}/src/psrcat_tar/psrcat . && \
         ln -sf ${INSTALL_DIR}/src/psrcat_tar/psrcat.db . && ln -sf ${INSTALL_DIR}/src/psrcat_tar/glitch.db .
     
-%environment
+%post
     export PSRCAT_FILE="${INSTALL_DIR}/bin/psrcat.db"
+    echo "export PSRCAT_FILE=$PSRCAT_FILE" >>$SINGULARITY_ENVIRONMENT
 
 #*******************
 #      TEMPO 
@@ -43,8 +44,9 @@ From: deduction-pre-pulsar.sif
     make -j${NP} && make install
     awk '{print $(NF-1), $0}' obsys.dat | sort -V | cut -d\  -f2-
 
-%environment
+%post
     export TEMPO="${INSTALL_DIR}/src/tempo"
+    echo "export TEMPO=$TEMPO" >>$SINGULARITY_ENVIRONMENT
 
 #*******************
 #     TEMPO2
@@ -81,9 +83,9 @@ From: deduction-pre-pulsar.sif
     cp observatories.dat observatories.dat.orig
     sed -i '81i# NenuFAR\n\ 4324017.054    165545.160      4670271.072      NENUFAR             nenufar' observatories.dat
 
-%environment
-    export TEMPO2="${INSTALL_DIR}/share/tempo2"
-    export TEMPO2_PLUG_PATH=${TEMPO2}/plugins/
+%post
+    echo "export TEMPO2=$TEMPO2" >>$SINGULARITY_ENVIRONMENT
+    echo "export TEMPO2_PLUG_PATH=$TEMPO2_PLUG_PATH" >>$SINGULARITY_ENVIRONMENT
 
 #*******************
 #      EPSIC 
@@ -119,9 +121,10 @@ From: deduction-pre-pulsar.sif
     sed -i 's/^ArrivalTime::default_format/#ArrivalTime::default_format/' $PSRCHIVE_CONFIG
     sed -i '/^#.*ArrivalTime::default_format\ =/a ArrivalTime::default_format\ =\ Tempo2' $PSRCHIVE_CONFIG
 
-%environment
+%post
     export PYTHONPATH=/usr/local/lib/python3.8/site-packages:${PYTHONPATH}
     export PSRCHIVE_CONFIG=${INSTALL_DIR}/etc/psrchive.cfg
+    echo "export PSRCHIVE_CONFIG=$PSRCHIVE_CONFIG" >>$SINGULARITY_ENVIRONMENT
 
 #*******************
 #     MARK5ACCESS 
@@ -139,12 +142,18 @@ From: deduction-pre-pulsar.sif
     apt -y install   python3-casacore
     export DATA_DIR=${INSTALL_DIR}/share/casacore/data
     mkdir -p ${DATA_DIR}
+    # Unfortunately ASTRONs FTP server is not accessible (at least currently) from the outside, so 
+    # getting the WSRT Measures archive from my own repository
+    #cd ${DATA_DIR} && \
+    #    wget --retry-connrefused --ftp-user=anonymous ftp://ftp.astron.nl/outgoing/Measures/WSRT_Measures.ztar && \
+    #    tar xf WSRT_Measures.ztar && rm -f WSRT_Measures.ztar
     cd ${DATA_DIR} && \
-        wget --retry-connrefused ftp://ftp.astron.nl/outgoing/Measures/WSRT_Measures.ztar && \
+        git clone https://github.com/vkond/casacore-data && \
+        mv casacore-data/WSRT_Measures.ztar . && rm -rf casacore-data && \
         tar xf WSRT_Measures.ztar && rm -f WSRT_Measures.ztar
 
-%environment
-    export DATA_DIR=${INSTALL_DIR}/share/casacore/data
+%post
+    echo "export DATA_DIR=$DATA_DIR" >>$SINGULARITY_ENVIRONMENT
 
 #*******************
 #     ANTPAT
@@ -172,10 +181,13 @@ From: deduction-pre-pulsar.sif
     cd database && 2to3 -w *.py
     cd ../cleaners && 2to3 -w *.py
 
-%environment
+%post
     export PYTHONPATH=${INSTALL_DIR}/src:${INSTALL_DIR}/src/coast_guard:${PYTHONPATH}
     export PATH=${INSTALL_DIR}/src/coast_guard:${PATH}
     export COASTGUARD_CFG="${INSTALL_DIR}/src/coast_guard/configurations"
+    
+%post
+    echo "export COASTGUARD_CFG=$COASTGUARD_CFG" >>$SINGULARITY_ENVIRONMENT    
 
 #*******************
 #    SIGPROC
@@ -204,9 +216,9 @@ From: deduction-pre-pulsar.sif
     make peak && make ffa && make spec && make makedummy && \
     cp libsigproc_linux.a ${INSTALL_DIR}/lib
 
-%environment
+%post
     export PATH=${INSTALL_DIR}/src/sigproc-4.3:${PATH}
-
+    
 #*******************
 #   PSRFITS_UTILS
 #*******************
@@ -216,6 +228,17 @@ From: deduction-pre-pulsar.sif
     ./configure --prefix=${INSTALL_DIR}
     make && make install && make distclean
 
+#*******************
+#      CLFD
+#*******************
+%post
+    cd ${INSTALL_DIR}/src && git clone https://github.com/v-morello/clfd
+    cd clfd && make install
+    
+%post
+    echo "export PATH=$PATH" >>$SINGULARITY_ENVIRONMENT    
+    echo "export PYTHONPATH=$PYTHONPATH" >>$SINGULARITY_ENVIRONMENT    
+    
 #*******************
 #     pySLALIB
 #*******************
@@ -237,7 +260,7 @@ From: deduction-pre-pulsar.sif
 
 %labels
     Author Vlad Kondratiev
-    Version v0.92
+    Version v$PSR_deduction_version
 
 %help
     This is a container for pulsar work on a dedicated workstation

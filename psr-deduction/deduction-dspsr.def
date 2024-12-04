@@ -11,6 +11,8 @@ From: deduction-pulsar.sif
 %post
     cd ${INSTALL_DIR}/src && git clone git://git.code.sf.net/p/dspsr/code dspsr
     cd dspsr && ./bootstrap
+    export CXXFLAGS=-I/usr/local/include/Pulsar
+    export CFLAGS=-I/usr/local/include/Pulsar
     echo "apsr asp bcpm bpsr caspsr cpsr cpsr2 dada dummy fits gmrt guppi kat lbadr lbadr64 lofar_dal lump lwa mark4 mark5 mark5b maxim mwa pdev pmdaq puma2 s2 sigproc ska1 spda1k spigot vdif" > backends.list
     #./configure PYTHON=/usr/bin/python3 --prefix=${INSTALL_DIR} --enable-shared --with-x --with-hdf5-incdir=/usr/include/hdf5/serial --with-hdf5-libdir=/usr/lib/x86_64-linux-gnu/hdf5/serial --x-includes=/usr/include/X11 --x-libraries=/usr/lib/x86_64-linux-gnu --with-mpi --with-mpi-inc-dir=/usr/include/x86_64-linux-gnu/mpich --with-mpi-lib-dir=/usr/lib/x86_64-linux-gnu
     ./configure PYTHON=/usr/bin/python3 --prefix=${INSTALL_DIR} --enable-shared --with-x --with-hdf5-incdir=/usr/include/hdf5/serial --with-hdf5-libdir=/usr/lib/x86_64-linux-gnu/hdf5/serial --x-includes=/usr/include/X11 --x-libraries=/usr/lib/x86_64-linux-gnu
@@ -18,7 +20,7 @@ From: deduction-pulsar.sif
 
 %labels
     Author Vlad Kondratiev
-    Version v0.92
+    Version v$PSR_deduction_version
 
 %help
     This is a container for pulsar work on a dedicated workstation

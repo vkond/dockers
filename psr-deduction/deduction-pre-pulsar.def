@@ -11,21 +11,27 @@ From: deduction101.sif
 %post
     apt-get install -y pgplot5 libcpgplot0
 
-%environment
+%post
     export PGPLOT_BACKGROUND=white
     export PGPLOT_DEV=/xwin
     export PGPLOT_DIR=/usr/lib/pgplot5
     export PGPLOT_FONT=/usr/lib/pgplot5/grfont.dat
     export PGPLOT_FOREGROUND=black
     export PGPLOT_INCLUDES=/usr/include
-
+    
+%post
+    echo "export PGPLOT_BACKGROUND=$PGPLOT_BACKGROUND" >>$SINGULARITY_ENVIRONMENT
+    echo "export PGPLOT_DEV=$PGPLOT_DEV" >>$SINGULARITY_ENVIRONMENT
+    echo "export PGPLOT_DIR=$PGPLOT_DIR" >>$SINGULARITY_ENVIRONMENT
+    echo "export PGPLOT_FONT=$PGPLOT_FONT" >>$SINGULARITY_ENVIRONMENT
+    echo "export PGPLOT_FOREGROUND=$PGPLOT_FOREGROUND" >>$SINGULARITY_ENVIRONMENT
+    echo "export PGPLOT_INCLUDES=$PGPLOT_INCLUDES" >>$SINGULARITY_ENVIRONMENT
 
 #*******************
 #      FFTW
 #*******************
 %post
-    export FFTW_VERSION="3.3.10"
-    export INSTALL_DIR=/usr/local
+    export FFTW_VERSION="3.3.10"    
     cd ${INSTALL_DIR}/src && wget --retry-connrefused ftp://ftp.fftw.org/pub/fftw/fftw-${FFTW_VERSION}.tar.gz && \
         tar xvfz fftw-${FFTW_VERSION}.tar.gz && rm -f fftw-${FFTW_VERSION}.tar.gz && cd fftw-${FFTW_VERSION}
     # float (single) precision
