@@ -18,6 +18,18 @@ From: deduction-pulsar.sif
     ./configure PYTHON=/usr/bin/python3 --prefix=${INSTALL_DIR} --enable-shared --with-x --with-hdf5-incdir=/usr/include/hdf5/serial --with-hdf5-libdir=/usr/lib/x86_64-linux-gnu/hdf5/serial --x-includes=/usr/include/X11 --x-libraries=/usr/lib/x86_64-linux-gnu
     make -j${NP} && make install && make distclean
 
+#**********************
+#  LOFAR-SCRIPTS-REPO
+#**********************
+%post
+    cd ${INSTALL_DIR}/src && git clone https://git.astron.nl/kondratiev/lofar-scripts-repo
+    export PATH=${INSTALL_DIR}/src/lofar-scripts-repo:${INSTALL_DIR}/src/lofar-scripts-repo/tmss:${INSTALL_DIR}/src/lofar-scripts-repo/scheduling:${INSTALL_DIR}/src/lofar-scripts-repo/fluxcal:${PATH}
+    export PYTHONPATH=${INSTALL_DIR}/src/lofar-scripts-repo:${INSTALL_DIR}/src/lofar-scripts-repo/tmss:${INSTALL_DIR}/src/lofar-scripts-repo/scheduling:${INSTALL_DIR}/src/lofar-scripts-repo/fluxcal:${PYTHONPATH}
+
+%post
+    echo "export PATH=$PATH" >>$SINGULARITY_ENVIRONMENT    
+    echo "export PYTHONPATH=$PYTHONPATH" >>$SINGULARITY_ENVIRONMENT        
+    
 %labels
     Author Vlad Kondratiev
     Version v$PSR_deduction_version
