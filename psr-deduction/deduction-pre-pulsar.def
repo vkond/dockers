@@ -168,3 +168,17 @@ From: deduction101.sif
     aclocal && libtoolize --copy --force && autoconf && autoheader && automake -a -c
     ./configure CFLAGS=-fPIC FFLAGS=-fPIC --prefix=${INSTALL_DIR} --enable-shared
     make -j${NP} && make install && make distclean
+
+#*******************
+#    AOFLAGGER
+#*******************
+%post
+    apt-get install -y liblua5.3-de libgtkmm-3.0-dev libsigc++-2.0-dev casacore-data casacore-dev \
+                       libblas-dev liblapack-dev libboost-date-time-dev libboost-test-dev libboost-all-dev
+    cd ${INSTALL_DIR}/src && git clone https://gitlab.com/aroffringa/aoflagger && cd aoflagger
+    mkdir build && cd build
+    cmake -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} ../
+    make -j${NP} && make install
+
+%post
+    echo "export PYTHONPATH=${INSTALL_DIR}/lib:${PYTHONPATH}" >>$SINGULARITY_ENVIRONMENT
