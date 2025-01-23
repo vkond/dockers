@@ -26,6 +26,7 @@ From: deduction-pre-pulsar.sif
 #*******************
 %post
     cd ${INSTALL_DIR}/src && git clone http://git.code.sf.net/p/tempo/tempo && cd tempo
+    git reset --hard f58695ff60a03485056a2428d4afbe1867eda6af
     ### saving original obsys.dat in .orig
     mv obsys.dat obsys.dat.orig
     ### removing telescopes whose codes are the same as for NenuFAR/LOFAR stations
@@ -53,7 +54,7 @@ From: deduction-pre-pulsar.sif
 #*******************
 %post
     cd ${INSTALL_DIR}/src && git clone https://bitbucket.org/psrsoft/tempo2.git && cd tempo2
-    git reset --hard d56c885   # was set in the Golams EPTA singularity repo
+    git reset --hard d56c8856986ef1cc3618e0fbaa1de788d7708ad4   # was set in the Golams EPTA singularity repo
     ./bootstrap
     export TEMPO2="${INSTALL_DIR}/share/tempo2"
     export TEMPO2_PLUG_PATH=${TEMPO2}/plugins
@@ -91,16 +92,18 @@ From: deduction-pre-pulsar.sif
 #      EPSIC 
 #*******************
 %post
-    cd ${INSTALL_DIR}/src && git clone https://github.com/straten/epsic
-    cd epsic && cd src && ./bootstrap && ./configure CFLAGS=-fPIC FFLAGS=-fPIC --prefix=${INSTALL_DIR} --enable-shared
+    cd ${INSTALL_DIR}/src && git clone https://github.com/straten/epsic && cd epsic
+    git reset --hard be30b197e0a80d1f3f2b9fba9ad7db1fc23ac3e7
+    cd src && ./bootstrap && ./configure CFLAGS=-fPIC FFLAGS=-fPIC --prefix=${INSTALL_DIR} --enable-shared
     make -j${NP} && make install && make distclean
 
 #*******************
 #     PSRCHIVE
 #*******************
 %post
-    cd ${INSTALL_DIR}/src && git clone http://git.code.sf.net/p/psrchive/code psrchive
-    cd psrchive && ./bootstrap
+    cd ${INSTALL_DIR}/src && git clone http://git.code.sf.net/p/psrchive/code psrchive && cd psrchive
+    git reset --hard 0f0e41be2e003d161f47732004eff641520fed7f
+    ./bootstrap
     #./configure PYTHON=/usr/bin/python3 --prefix=${INSTALL_DIR} --enable-shared --with-x --with-psrcat=psrcat --with-psrxml-dir=${INSTALL_DIR}/lib --with-eigen-include-dir=${INSTALL_DIR}/include/eigen3 --with-eigen-dir=${INSTALL_DIR}/src/eigen --with-splinter-lib-dir=${INSTALL_DIR}/lib --with-splinter-include-dir=${INSTALL_DIR}/inclide/SPLINTER --x-libraries=/usr/lib/x86_64-linux-gnu --x-includes=/usr/include/X11 --with-mpi --with-mpi-inc-dir=/usr/include/x86_64-linux-gnu/mpich --with-mpi-lib-dir=/usr/lib/x86_64-linux-gnu
     ./configure PYTHON=/usr/bin/python3 --prefix=${INSTALL_DIR} --enable-shared --with-x --with-psrcat=psrcat --with-psrxml-dir=${INSTALL_DIR}/lib --with-eigen-include-dir=${INSTALL_DIR}/include/eigen3 --with-eigen-dir=${INSTALL_DIR}/src/eigen --with-splinter-lib-dir=${INSTALL_DIR}/lib --with-splinter-include-dir=${INSTALL_DIR}/inclide/SPLINTER --x-libraries=/usr/lib/x86_64-linux-gnu --x-includes=/usr/include/X11
     make -j${NP} && make install && make distclean
@@ -232,8 +235,9 @@ From: deduction-pre-pulsar.sif
 #      CLFD
 #*******************
 %post
-    cd ${INSTALL_DIR}/src && git clone https://github.com/v-morello/clfd
-    cd clfd && make install
+    cd ${INSTALL_DIR}/src && git clone https://github.com/v-morello/clfd && cd clfd
+    git reset --hard 2500ee7264f69acb39053bd895006680711d4cc4
+    make install
     
 %post
     echo "export PATH=$PATH" >>$SINGULARITY_ENVIRONMENT    

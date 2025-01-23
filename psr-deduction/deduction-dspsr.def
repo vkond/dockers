@@ -9,8 +9,9 @@ From: deduction-pulsar.sif
 #     DSPSR
 #*******************
 %post
-    cd ${INSTALL_DIR}/src && git clone git://git.code.sf.net/p/dspsr/code dspsr
-    cd dspsr && ./bootstrap
+    cd ${INSTALL_DIR}/src && git clone git://git.code.sf.net/p/dspsr/code dspsr && cd dspsr
+    git reset --hard 548b7161813c8056202ae8320fe132ebcda363eb
+    ./bootstrap
     export CXXFLAGS=-I/usr/local/include/Pulsar
     export CFLAGS=-I/usr/local/include/Pulsar
     echo "apsr asp bcpm bpsr caspsr cpsr cpsr2 dada dummy fits gmrt guppi kat lbadr lbadr64 lofar_dal lump lwa mark4 mark5 mark5b maxim mwa pdev pmdaq puma2 s2 sigproc ska1 spda1k spigot vdif" > backends.list

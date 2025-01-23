@@ -29,26 +29,24 @@ From: ubuntu:20.04
     export TZ=Europe/Amsterdam
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
     echo "export TZ=$TZ" >>$SINGULARITY_ENVIRONMENT
-  
-%post
-    pip3 install numpy scipy astropy matplotlib seaborn healpy scikit-learn jupyter
-    apt-get install -y python3-cartopy saods9 ftools-fv
-    apt-get install -y python3-tqdm python3-lmfit
-
-%post
-    apt-get install -y tcsh wget git vim cmake imagemagick ghostscript gv mc bcal \
-       autoconf automake libtool libgsl-dev git-svn tmux terminator texlive dialog latex2html \
-       valgrind doxygen python3-sphinx libxml2-dev libxml2-utils \
-       bison libreadline-dev libx11-dev libxt-dev libx11-6 libxt6 libyaml-cpp-dev pkg-config \
-       libglib2.0-dev libpng-dev libpng++-dev \
-       openmpi-bin libopenmpi-dev mpich libmpich-dev libhdf5-openmpi-dev libhdf5-mpich-dev \
-       locales emacs nano x11-apps graphviz
 
 #*******************
 #    HDF5 / SWIG
 #*******************
 %post
-    apt-get install -y libhdf5-103 libhdf5-dev hdf5-tools python3-h5py swig
+    apt-get install -y libhdf5-103 libhdf5-dev hdf5-tools swig
+    pip3 install numpy scipy astropy matplotlib seaborn healpy scikit-learn jupyter h5py
+    apt-get install -y python3-cartopy saods9 ftools-fv
+    apt-get install -y python3-tqdm python3-lmfit
+
+%post
+    apt-get install -y tcsh wget git vim cmake imagemagick ghostscript gv mc bcal \
+       autoconf automake libtool libgsl-dev git-svn tmux screen terminator texlive dialog latex2html \
+       valgrind doxygen python3-sphinx libxml2-dev libxml2-utils \
+       bison libreadline-dev libx11-dev libxt-dev libx11-6 libxt6 libyaml-cpp-dev pkg-config \
+       libglib2.0-dev libpng-dev libpng++-dev \
+       openmpi-bin libopenmpi-dev mpich libmpich-dev libhdf5-openmpi-dev libhdf5-mpich-dev \
+       locales emacs nano x11-apps graphviz time
 
 %post
     apt install -y software-properties-common apt-transport-https
