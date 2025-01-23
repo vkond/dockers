@@ -30,9 +30,9 @@ From: ubuntu:20.04
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
     echo "export TZ=$TZ" >>$SINGULARITY_ENVIRONMENT
 
-#*******************
+#********************
 #    HDF5 / SWIG
-#*******************
+#********************
 %post
     apt-get install -y libhdf5-103 libhdf5-dev hdf5-tools swig
     pip3 install numpy scipy astropy matplotlib seaborn healpy scikit-learn jupyter h5py
@@ -47,6 +47,13 @@ From: ubuntu:20.04
        libglib2.0-dev libpng-dev libpng++-dev \
        openmpi-bin libopenmpi-dev mpich libmpich-dev libhdf5-openmpi-dev libhdf5-mpich-dev \
        locales emacs nano x11-apps graphviz time
+    # enabling PS/PDF types for ImageMagick
+    sed -i -e '/<policy [^>]*\"PDF\"/ {s//<!--\n\t&/; s~<*\"PDF\" />~&\n\t-->~;}' /etc/ImageMagick-*/policy.xml
+    sed -i -e '/<policy [^>]*\"XPS\"/ {s//<!--\n\t&/; s~<*\"XPS\" />~&\n\t-->~;}' /etc/ImageMagick-*/policy.xml
+    sed -i -e '/<policy [^>]*\"PS\"/ {s//<!--\n\t&/; s~<*\"PS\" />~&\n\t-->~;}' /etc/ImageMagick-*/policy.xml
+    sed -i -e '/<policy [^>]*\"PS2\"/ {s//<!--\n\t&/; s~<*\"PS2\" />~&\n\t-->~;}' /etc/ImageMagick-*/policy.xml
+    sed -i -e '/<policy [^>]*\"PS3\"/ {s//<!--\n\t&/; s~<*\"PS3\" />~&\n\t-->~;}' /etc/ImageMagick-*/policy.xml
+    sed -i -e '/<policy [^>]*\"EPS\"/ {s//<!--\n\t&/; s~<*\"EPS\" />~&\n\t-->~;}' /etc/ImageMagick-*/policy.xml
 
 %post
     apt install -y software-properties-common apt-transport-https

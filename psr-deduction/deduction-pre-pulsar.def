@@ -27,9 +27,9 @@ From: deduction101.sif
     echo "export PGPLOT_FOREGROUND=$PGPLOT_FOREGROUND" >>$SINGULARITY_ENVIRONMENT
     echo "export PGPLOT_INCLUDES=$PGPLOT_INCLUDES" >>$SINGULARITY_ENVIRONMENT
 
-#*******************
+#********************
 #      FFTW
-#*******************
+#********************
 %post
     export FFTW_VERSION="3.3.10"    
     cd ${INSTALL_DIR}/src && wget --retry-connrefused ftp://ftp.fftw.org/pub/fftw/fftw-${FFTW_VERSION}.tar.gz && \

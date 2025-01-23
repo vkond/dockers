@@ -5,9 +5,9 @@
 Bootstrap: localimage
 From: deduction-pre-pulsar.sif
 
-#*******************
+#********************
 #      PSRCAT 
-#*******************
+#********************
 %post
     cd ${INSTALL_DIR}/src && wget --retry-connrefused --no-check-certificate https://www.atnf.csiro.au/research/pulsar/psrcat/downloads/psrcat_pkg.tar.gz
     tar xvfz psrcat_pkg.tar.gz && rm -f psrcat_pkg.tar.gz && cd psrcat_tar

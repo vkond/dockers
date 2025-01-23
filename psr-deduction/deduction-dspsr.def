@@ -27,9 +27,9 @@ From: deduction-pulsar.sif
     export PATH=${INSTALL_DIR}/src/lofar-scripts-repo:${INSTALL_DIR}/src/lofar-scripts-repo/tmss:${INSTALL_DIR}/src/lofar-scripts-repo/scheduling:${INSTALL_DIR}/src/lofar-scripts-repo/fluxcal:${PATH}
     export PYTHONPATH=${INSTALL_DIR}/src/lofar-scripts-repo:${INSTALL_DIR}/src/lofar-scripts-repo/tmss:${INSTALL_DIR}/src/lofar-scripts-repo/scheduling:${INSTALL_DIR}/src/lofar-scripts-repo/fluxcal:${PYTHONPATH}
 
-#**********************************
+#***********************************
 # Cees Bassa commissioning scripts  
-#**********************************
+#***********************************
 %post
     cd ${INSTALL_DIR}/src && git clone https://git.astron.nl/bassa/commissioning_scripts
     export PATH=${INSTALL_DIR}/src/commissioning_scripts::${PATH}
